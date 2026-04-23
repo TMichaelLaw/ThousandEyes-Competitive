@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Meraki MX + ThousandEyes vs. The Field — Seller Battle Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Actual ThousandEyes + Meraki Brand Palette */
+    --bg:#FAFAF7;              /* warm paper */
+    --bg-warm:#F2EFE8;         /* subtle panel */
+    --bg-ink:#1A1A1A;          /* near-black ink for dominant dark panels */
+    --bg-ink-2:#0E0E0E;        /* deeper ink */
+    --ink:#1A1A1A;
+    --ink-soft:#383838;
+    --ink-mute:#6E6E6E;
+    --ink-faint:#A8A8A5;
+    --line:#E0DDD4;
+    --line-strong:#C8C4B8;
+
+    /* Brand — Meraki green */
+    --meraki:#7AB800;          /* Meraki signature green */
+    --meraki-bright:#9AD619;   /* vivid accent */
+    --meraki-deep:#4E7800;     /* deep forest */
+
+    /* Brand — ThousandEyes orange */
+    --te:#E95420;              /* ThousandEyes signature orange */
+    --te-bright:#FF6B35;       /* luminous hover */
+    --te-deep:#B23810;         /* burnt orange */
+
+    /* Aliases (back-compat with pre-existing class naming) */
+    --cisco:#1A1A1A;           /* use ink for Cisco refs now */
+    --cisco-accent:#E95420;    /* TE orange */
+
+    /* Competitor accents (unchanged — used for differentiation) */
+    --flame:#C0392B;
+    --saffron:#F5A623;
+    --plum:#6A1B9A;
+    --moss:#2E7D32;
+    --crimson:#8B1F1F;
+    --warn:#C77C00;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Manrope', sans-serif;
+    font-weight:400;
+    line-height:1.5;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:1000;
+    opacity:.05;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.7 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  }
+  .serif{font-family:'Instrument Serif', serif}
+  .mono{font-family:'DM Mono', monospace}
+  a{color:inherit}
+  ::selection{background:var(--te); color:white}
+
+  .wrap{max-width:1360px; margin:0 auto; padding:0 32px}
+
+  /* ============ TOP BAR ============ */
+  .topbar{
+    position:sticky; top:0; z-index:100;
+    background:rgba(250,250,247,.92); backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 32px; max-width:1360px; margin:0 auto;
+  }
+  .brand{
+    display:flex; align-items:center; gap:14px;
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.15em; text-transform:uppercase;
+  }
+  .brand .logo{
+    width:30px; height:30px; border-radius:50%;
+    background: conic-gradient(from 90deg, var(--meraki) 0 50%, var(--te) 50% 100%);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    box-shadow: 0 0 0 1px rgba(26,26,26,.08);
+  }
+  .brand .logo::before{
+    content:""; position:absolute; inset:5px; border-radius:50%;
+    background:var(--bg);
+  }
+  .brand .logo::after{
+    content:""; position:absolute; inset:10px; border-radius:50%;
+    background: conic-gradient(from 90deg, var(--meraki) 0 50%, var(--te) 50% 100%);
+  }
+  .top-nav{display:flex; gap:28px; font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase}
+  .top-nav a{color:var(--ink-mute); text-decoration:none; transition: color .2s}
+  .top-nav a:hover{color:var(--te)}
+  .top-stamp{
+    font-family:'DM Mono', monospace; font-size:10px;
+    color:var(--ink-faint); letter-spacing:.15em;
+  }
+
+  /* ============ HERO ============ */
+  .hero{
+    padding:90px 0 110px;
+    background:
+      radial-gradient(ellipse at 88% 18%, rgba(233,84,32,.18), transparent 55%),
+      radial-gradient(ellipse at 12% 88%, rgba(122,184,0,.15), transparent 55%),
+      var(--bg);
+    position:relative; overflow:hidden;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-grid-bg{
+    position:absolute; inset:0; z-index:0; opacity:.4;
+    background-image:
+      linear-gradient(to right, rgba(26,26,26,.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26,26,26,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%);
+  }
+
+  .hero-kicker{
+    display:flex; gap:10px; align-items:center;
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-mute); margin-bottom:28px;
+    position:relative; z-index:2;
+    opacity:0; animation: rise .7s ease-out .1s forwards;
+  }
+  .hero-kicker .pill{
+    background:var(--bg-ink); color:var(--bg); padding:5px 12px; border-radius:100px;
+    letter-spacing:.15em;
+  }
+  .hero-kicker .pill.te{background:var(--te); color:white}
+  .hero-kicker .pill.meraki{background:var(--meraki); color:white}
+
+  .hero-title{
+    font-family:'Instrument Serif', serif;
+    font-size:clamp(48px, 8.5vw, 128px);
+    line-height:.95; letter-spacing:-.025em; font-weight:400;
+    max-width:1250px;
+    position:relative; z-index:2;
+  }
+  .hero-title .line{display:block; opacity:0; transform:translateY(30px); animation: rise .9s cubic-bezier(.2,.7,.2,1) forwards}
+  .hero-title .line:nth-child(1){animation-delay:.2s}
+  .hero-title .line:nth-child(2){animation-delay:.4s}
+  .hero-title .line:nth-child(3){animation-delay:.6s}
+  .hero-title em{font-style:italic; color:var(--ink-mute); font-weight:300}
+  .hero-title .hl{color:var(--te); font-style:italic}
+  @keyframes rise{to{opacity:1; transform:translateY(0)}}
+
+  .hero-sub{
+    margin-top:40px; max-width:720px;
+    font-size:18px; line-height:1.6; color:var(--ink-soft);
+    position:relative; z-index:2;
+    opacity:0; animation: rise .7s ease-out .8s forwards;
+  }
+  .hero-sub strong{color:var(--ink); font-weight:600}
+
+  /* seller's toolbox row */
+  .tool-row{
+    margin-top:64px;
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:0;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    position:relative; z-index:2;
+    opacity:0; animation: rise .7s ease-out 1s forwards;
+  }
+  .tool-item{
+    padding:24px 20px;
+    border-right:1px solid var(--line);
+  }
+  .tool-item:last-child{border-right:0}
+  .tool-item .n{
+    font-family:'DM Mono', monospace; font-size:10px;
+    color:var(--ink-faint); letter-spacing:.2em; margin-bottom:8px;
+  }
+  .tool-item .t{
+    font-family:'Instrument Serif', serif; font-size:22px;
+    line-height:1.15; color:var(--ink); font-weight:400;
+  }
+  .tool-item .t em{font-style:italic; color:var(--ink-mute)}
+
+  /* ============ SECTION COMMON ============ */
+  section{padding:110px 0; position:relative}
+  .sec-head{max-width:900px; margin-bottom:60px}
+  .sec-kicker{
+    display:flex; align-items:center; gap:14px;
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--meraki-deep); margin-bottom:20px;
+  }
+  .sec-kicker::before{
+    content:""; width:36px; height:1px; background:var(--meraki);
+  }
+  .sec-title{
+    font-family:'Instrument Serif', serif;
+    font-size:clamp(36px, 5vw, 68px);
+    letter-spacing:-.02em; line-height:1.02; font-weight:400;
+  }
+  .sec-title em{font-style:italic; color:var(--ink-mute); font-weight:300}
+  .sec-lede{
+    margin-top:22px; font-size:17px; color:var(--ink-soft); line-height:1.65;
+    max-width:700px;
+  }
+
+  .reveal{opacity:0; transform:translateY(24px); transition: all .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1; transform:translateY(0)}
+
+  /* ============ SECTION 1: THE PITCH ============ */
+  .pitch-grid{
+    display:grid; grid-template-columns: 1fr 1fr 1fr; gap:24px;
+  }
+  .pitch-card{
+    background:white; border:1px solid var(--line); border-radius:4px;
+    padding:32px 28px;
+    position:relative; overflow:hidden;
+    transition: all .3s ease;
+  }
+  .pitch-card:hover{
+    transform:translateY(-3px);
+    box-shadow: 0 20px 40px -20px rgba(26,26,26,.2);
+    border-color:var(--cisco-accent);
+  }
+  .pitch-card .num{
+    font-family:'Instrument Serif', serif; font-style:italic;
+    font-size:54px; color:var(--te); line-height:1; font-weight:400;
+    margin-bottom:16px;
+  }
+  .pitch-card h3{
+    font-family:'Instrument Serif', serif; font-size:26px;
+    line-height:1.15; margin-bottom:14px; letter-spacing:-.01em; font-weight:500;
+  }
+  .pitch-card p{font-size:14px; color:var(--ink-soft); line-height:1.6}
+  .pitch-card .tag{
+    margin-top:16px;
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--ink-mute);
+  }
+
+  /* ============ SECTION 2: SELLER TAKEAWAY ============ */
+  .takeaway{
+    background:var(--bg-ink); color:var(--bg);
+    padding:80px; border-radius:6px;
+    position:relative; overflow:hidden;
+  }
+  .takeaway::before{
+    content:""; position:absolute; inset:0;
+    background: radial-gradient(circle at 85% 30%, rgba(233,84,32,.15), transparent 50%);
+  }
+  .takeaway-label{
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--te); margin-bottom:24px;
+    position:relative; z-index:2;
+  }
+  .takeaway h2{
+    font-family:'Instrument Serif', serif;
+    font-size:clamp(30px, 4vw, 52px); line-height:1.1;
+    letter-spacing:-.02em; max-width:1100px;
+    position:relative; z-index:2; font-weight:400;
+  }
+  .takeaway h2 em{font-style:italic; color:#9d9d96}
+  .takeaway h2 .hl{color:var(--te); font-style:italic}
+  .takeaway-pull{
+    margin-top:48px; padding-top:36px; border-top:1px solid #1F3A5F;
+    display:grid; grid-template-columns: 1fr 1fr; gap:60px;
+    position:relative; z-index:2;
+  }
+  .takeaway-pull .say{
+    font-family:'Instrument Serif', serif; font-style:italic;
+    font-size:22px; line-height:1.3; color:#f2f2ef;
+  }
+  .takeaway-pull .label{
+    font-family:'DM Mono', monospace; font-size:10px;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint);
+    margin-bottom:12px;
+  }
+
+  /* ============ SECTION 3: COMPETITOR LANDSCAPE ============ */
+  .land-grid{display:grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap:0; border-top:2px solid var(--ink); border-bottom:2px solid var(--ink)}
+  .land-col{padding:28px 22px; border-right:1px solid var(--line); position:relative; background:var(--bg-warm); min-height:420px}
+  .land-col:last-child{border-right:0}
+  .land-col .vendor{
+    font-family:'Instrument Serif', serif; font-size:22px;
+    margin-bottom:6px; font-weight:500;
+  }
+  .land-col .dem-name{
+    font-family:'DM Mono', monospace; font-size:10px;
+    letter-spacing:.15em; text-transform:uppercase; color:var(--ink-mute);
+    margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);
+  }
+  .land-col h5{
+    font-family:'DM Mono', monospace; font-size:10px;
+    letter-spacing:.15em; text-transform:uppercase; color:var(--ink-mute);
+    margin-top:20px; margin-bottom:8px;
+  }
+  .land-col p{font-size:13px; color:var(--ink-soft); line-height:1.55}
+  .land-col .verdict{
+    position:absolute; bottom:20px; left:22px; right:22px;
+    padding-top:16px; border-top:1px dashed var(--line-strong);
+    font-family:'Instrument Serif', serif; font-style:italic; font-size:15px;
+    color:var(--ink); line-height:1.35;
+  }
+  .land-col.fortinet{background: linear-gradient(180deg, rgba(192,57,43,.06), transparent 70%), var(--bg-warm)}
+  .land-col.aruba{background: linear-gradient(180deg, rgba(245,166,35,.06), transparent 70%), var(--bg-warm)}
+  .land-col.palo{background: linear-gradient(180deg, rgba(106,27,154,.06), transparent 70%), var(--bg-warm)}
+  .land-col.versa{background: linear-gradient(180deg, rgba(192,57,43,.06), transparent 70%), var(--bg-warm)}
+
+  .land-col .vendor-chip{
+    font-family:'DM Mono', monospace; font-size:9px; letter-spacing:.2em;
+    text-transform:uppercase; padding:3px 8px; border-radius:2px;
+    color:white; margin-bottom:10px; display:inline-block;
+  }
+  .land-col.fortinet .vendor-chip{background:var(--flame)}
+  .land-col.aruba .vendor-chip{background:var(--saffron)}
+  .land-col.palo .vendor-chip{background:var(--plum)}
+  .land-col.versa .vendor-chip{background:var(--crimson)}
+
+  /* ============ SECTION 4: THE WEDGE (HONEST COMPARISON TABLE) ============ */
+  .wedge-intro{
+    background:white; padding:36px; border:1px solid var(--line); border-radius:4px;
+    margin-bottom:36px; display:flex; gap:30px; align-items:flex-start;
+  }
+  .wedge-intro .icon-box{
+    flex-shrink:0; width:64px; height:64px; border-radius:4px;
+    background:var(--te); color:white;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Instrument Serif', serif; font-size:36px; font-style:italic;
+  }
+  .wedge-intro .content h4{
+    font-family:'Instrument Serif', serif; font-size:24px;
+    margin-bottom:8px; font-weight:500;
+  }
+  .wedge-intro .content p{color:var(--ink-soft); font-size:15px; line-height:1.6}
+
+  .wedge-table{
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; background:white;
+  }
+  .wedge-head{
+    display:grid;
+    grid-template-columns: 1.8fr 1.2fr 1fr 1fr 1fr 1fr;
+    background:var(--bg-ink); color:white;
+  }
+  .wedge-head .th{
+    padding:20px 18px;
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.15em; text-transform:uppercase;
+    border-right:1px solid #1F3A5F;
+  }
+  .wedge-head .th:last-child{border-right:0}
+  .wedge-head .th.us{color:var(--te); background:rgba(233,84,32,.08)}
+
+  .wedge-row{
+    display:grid;
+    grid-template-columns: 1.8fr 1.2fr 1fr 1fr 1fr 1fr;
+    border-top:1px solid var(--line);
+  }
+  .wedge-row:hover{background:var(--bg-warm)}
+  .wedge-row .td{
+    padding:18px;
+    font-size:13.5px; line-height:1.5;
+    border-right:1px solid var(--line);
+  }
+  .wedge-row .td:last-child{border-right:0}
+  .wedge-row .cap{
+    font-family:'Instrument Serif', serif; font-size:17px;
+    line-height:1.2; font-weight:500;
+  }
+  .wedge-row .cap .sub{
+    display:block; font-family:'Manrope', sans-serif; font-size:12px; font-weight:400;
+    color:var(--ink-mute); margin-top:3px;
+  }
+  .wedge-row .us{background:rgba(233,84,32,.05); border-left:2px solid var(--te); border-right:2px solid var(--te)}
+
+  .mark{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; padding:3px 8px; border-radius:2px;
+    margin-bottom:6px;
+  }
+  .mark.yes{background:rgba(46,125,50,.1); color:var(--moss)}
+  .mark.partial{background:rgba(199,124,0,.12); color:var(--warn)}
+  .mark.no{background:rgba(192,57,43,.1); color:var(--crimson)}
+  .mark.best{background:var(--te); color:white}
+  .mark-detail{display:block; color:var(--ink-soft); font-size:12.5px; line-height:1.5}
+
+  /* ============ SECTION 5: THE DIFFERENTIATORS ============ */
+  .diff-list{display:flex; flex-direction:column; gap:6px}
+  .diff-item{
+    display:grid; grid-template-columns: 80px 1fr 1.2fr; gap:40px; align-items:center;
+    padding:40px 32px; background:white; border:1px solid var(--line); border-radius:4px;
+    transition: all .3s ease;
+  }
+  .diff-item:hover{
+    background:var(--bg-warm);
+    border-color:var(--te);
+    transform: translateX(6px);
+  }
+  .diff-item .n{
+    font-family:'Instrument Serif', serif; font-style:italic;
+    font-size:64px; color:var(--te); line-height:1; font-weight:400;
+  }
+  .diff-item .title{
+    font-family:'Instrument Serif', serif; font-size:26px;
+    line-height:1.15; letter-spacing:-.01em; font-weight:500;
+  }
+  .diff-item .title em{font-style:italic; color:var(--ink-mute)}
+  .diff-item .desc{font-size:14px; color:var(--ink-soft); line-height:1.6}
+  .diff-item .desc strong{color:var(--ink); font-weight:600}
+  .diff-item .tag{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--te); margin-top:10px; display:inline-block;
+  }
+
+  /* ============ SECTION 6: CONVERSATION SIMULATOR ============ */
+  .sim-frame{
+    background:var(--bg-ink); color:white; padding:60px; border-radius:6px;
+    position:relative; overflow:hidden;
+  }
+  .sim-frame::before{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size:32px 32px;
+  }
+  .sim-intro{
+    font-family:'Instrument Serif', serif; font-size:24px; line-height:1.3;
+    color:#d8d8d2; max-width:800px; margin-bottom:40px; position:relative; z-index:2;
+    font-weight:400;
+  }
+  .sim-intro em{color:var(--te); font-style:italic}
+
+  .sim-tabs{
+    display:flex; gap:0; border-bottom:1px solid #1F3A5F; margin-bottom:32px;
+    position:relative; z-index:2; overflow-x:auto; flex-wrap:nowrap;
+  }
+  .sim-tab{
+    background:transparent; border:0; cursor:pointer; padding:16px 22px;
+    color:var(--ink-faint); white-space:nowrap;
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.15em;
+    text-transform:uppercase; position:relative; transition: color .2s;
+  }
+  .sim-tab:hover{color:#fff}
+  .sim-tab.active{color:var(--te)}
+  .sim-tab.active::after{
+    content:""; position:absolute; bottom:-1px; left:0; right:0; height:2px;
+    background:var(--te);
+  }
+
+  .sim-panel{display:none; position:relative; z-index:2}
+  .sim-panel.active{display:grid; grid-template-columns: 1fr 1fr; gap:32px}
+
+  .sim-q, .sim-a{padding:32px; border-radius:4px}
+  .sim-q{
+    background: rgba(255,255,255,.04); border-left:3px solid var(--flame);
+  }
+  .sim-q .role{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--flame); margin-bottom:12px;
+  }
+  .sim-q .msg{
+    font-family:'Instrument Serif', serif; font-size:22px; line-height:1.3;
+    color:white; font-weight:400;
+  }
+  .sim-a{
+    background: rgba(233,84,32,.08); border-left:3px solid var(--te);
+  }
+  .sim-a .role{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--te); margin-bottom:12px;
+  }
+  .sim-a .msg{font-size:15px; line-height:1.65; color:#e8e8e4}
+  .sim-a .msg strong{color:white; font-weight:600}
+  .sim-a .punch{
+    margin-top:16px; padding-top:16px; border-top:1px solid rgba(233,84,32,.2);
+    font-family:'Instrument Serif', serif; font-style:italic; font-size:16px;
+    color:var(--te);
+  }
+
+  /* ============ SECTION 7: SCENARIO MATRIX ============ */
+  .scen-matrix{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap:24px;
+  }
+  .scen-card{
+    background:white; border:1px solid var(--line); border-radius:4px;
+    padding:32px; transition: all .3s ease;
+    position:relative;
+  }
+  .scen-card:hover{border-color:var(--meraki); box-shadow:0 10px 30px -15px rgba(122,184,0,.25)}
+  .scen-card .ico{
+    width:44px; height:44px; border-radius:4px; background:var(--meraki); color:white;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Instrument Serif', serif; font-size:22px; font-style:italic;
+    margin-bottom:20px;
+  }
+  .scen-card h4{
+    font-family:'Instrument Serif', serif; font-size:22px; line-height:1.2;
+    margin-bottom:12px; font-weight:500;
+  }
+  .scen-card .situation{font-size:14px; color:var(--ink-soft); line-height:1.55; margin-bottom:20px}
+  .scen-card .outcome{
+    padding:14px 16px; background:var(--bg-warm); border-left:3px solid var(--te);
+    font-family:'Instrument Serif', serif; font-style:italic; font-size:15px;
+    color:var(--ink); line-height:1.4;
+  }
+  .scen-card .outcome strong{color:var(--te); font-style:normal; font-weight:600; font-family:'Manrope', sans-serif}
+  .scen-card .teaser{
+    margin-top:16px;
+    font-family:'DM Mono', monospace; font-size:10px; color:var(--meraki-deep);
+    letter-spacing:.15em; text-transform:uppercase;
+  }
+
+  /* ============ SECTION 8: OBJECTION HANDLING ============ */
+  .obj-list{display:flex; flex-direction:column; gap:12px}
+  .obj-item{
+    background:white; border:1px solid var(--line); border-radius:4px;
+    overflow:hidden;
+  }
+  .obj-q{
+    padding:24px 28px; cursor:pointer;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+    transition: background .2s;
+  }
+  .obj-q:hover{background:var(--bg-warm)}
+  .obj-q .q-text{
+    font-family:'Instrument Serif', serif; font-size:22px; line-height:1.25;
+    font-weight:500; flex:1;
+  }
+  .obj-q .q-text em{font-style:italic; color:var(--ink-mute)}
+  .obj-q .q-toggle{
+    flex-shrink:0; width:36px; height:36px; border-radius:50%;
+    background:var(--bg-warm); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Instrument Serif', serif; font-size:22px; font-weight:300;
+    transition: all .3s ease;
+  }
+  .obj-item.open .q-toggle{background:var(--te); color:white; transform:rotate(45deg); border-color:var(--te)}
+  .obj-a{
+    max-height:0; overflow:hidden; transition: max-height .4s ease;
+    padding: 0 28px;
+  }
+  .obj-item.open .obj-a{max-height:500px; padding:0 28px 32px 28px}
+  .obj-a .label{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--te); margin-bottom:14px;
+  }
+  .obj-a p{font-size:15px; color:var(--ink-soft); line-height:1.65; margin-bottom:14px}
+  .obj-a p strong{color:var(--ink); font-weight:600}
+  .obj-a .evidence{
+    margin-top:14px; padding:14px 18px; background:var(--bg-warm); border-left:3px solid var(--meraki);
+    font-size:13px; color:var(--ink-soft); line-height:1.55;
+  }
+  .obj-a .evidence strong{color:var(--meraki-deep); font-weight:600; font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:6px}
+
+  /* ============ SECTION 9: SELLER WORKFLOW ============ */
+  .flow-grid{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:0;
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; background:white;
+  }
+  .flow-step{
+    padding:32px 28px; border-right:1px solid var(--line);
+    position:relative;
+  }
+  .flow-step:last-child{border-right:0}
+  .flow-step .step-num{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-mute); margin-bottom:14px;
+  }
+  .flow-step .step-title{
+    font-family:'Instrument Serif', serif; font-size:22px; line-height:1.2;
+    margin-bottom:14px; font-weight:500;
+  }
+  .flow-step .step-desc{font-size:14px; color:var(--ink-soft); line-height:1.55}
+  .flow-step .step-prompt{
+    margin-top:16px; padding:12px 14px;
+    background:var(--bg-warm); border-left:2px solid var(--te);
+    font-family:'Instrument Serif', serif; font-style:italic; font-size:14px;
+    color:var(--ink); line-height:1.4;
+  }
+  .flow-step::after{
+    content:""; position:absolute; top:50%; right:-8px; width:14px; height:14px;
+    background:var(--te); border-radius:50%; transform:translateY(-50%);
+    border:3px solid var(--bg); z-index:2;
+  }
+  .flow-step:last-child::after{display:none}
+
+  /* ============ SECTION 10: CLOSING BRIEF ============ */
+  .brief{
+    background: var(--bg-ink); color: var(--bg);
+    padding:90px 80px; border-radius:6px;
+    position:relative; overflow:hidden;
+  }
+  .brief::before{
+    content:""; position:absolute; top:-80px; right:-80px; width:400px; height:400px;
+    border-radius:50%; background: radial-gradient(circle, rgba(233,84,32,.25), transparent 70%);
+    filter:blur(40px);
+  }
+  .brief-label{
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--te); margin-bottom:28px;
+    position:relative; z-index:2;
+  }
+  .brief h2{
+    font-family:'Instrument Serif', serif;
+    font-size:clamp(40px, 5.5vw, 80px); line-height:1.02; letter-spacing:-.02em;
+    max-width:1100px; font-weight:400; position:relative; z-index:2;
+  }
+  .brief h2 em{font-style:italic; color:#9b9b96}
+  .brief h2 .hl{color:var(--te); font-style:italic}
+
+  .brief-bottom{
+    margin-top:64px; padding-top:48px; border-top:1px solid #1F3A5F;
+    display:grid; grid-template-columns: 2fr 1fr; gap:60px;
+    position:relative; z-index:2;
+  }
+  .brief-msg h4{
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-faint); margin-bottom:14px;
+  }
+  .brief-msg p{
+    font-family:'Instrument Serif', serif; font-size:26px; font-style:italic;
+    line-height:1.35; color:white; font-weight:400;
+  }
+  .brief-meta{
+    font-family:'DM Mono', monospace; font-size:11px; color:var(--ink-faint);
+    letter-spacing:.1em; line-height:1.8;
+  }
+  .brief-meta strong{color:white; font-weight:500}
+
+  /* ============ FOOTER ============ */
+  footer{
+    padding:40px 0; border-top:1px solid var(--line);
+    font-family:'DM Mono', monospace; font-size:10px; color:var(--ink-faint);
+    letter-spacing:.1em;
+  }
+  .foot-inner{display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap}
+  .foot-inner .left{max-width:700px; line-height:1.7}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1100px){
+    .wedge-head, .wedge-row{grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr 1fr; font-size:12px}
+    .wedge-row .cap{font-size:15px}
+  }
+  @media (max-width: 900px){
+    .wrap{padding:0 20px}
+    .pitch-grid{grid-template-columns:1fr}
+    .land-grid{grid-template-columns:1fr 1fr}
+    .land-col:nth-child(2){border-right:0}
+    .land-col:nth-child(1), .land-col:nth-child(2){border-bottom:1px solid var(--line)}
+    .wedge-head, .wedge-row{grid-template-columns:1fr 1fr; font-size:12px}
+    .wedge-head .th{display:none}
+    .wedge-head .th:first-child{display:block; grid-column:1/-1}
+    .wedge-row .td:nth-child(n+3){grid-column:auto}
+    .diff-item{grid-template-columns:1fr; gap:12px}
+    .diff-item .n{font-size:44px}
+    .sim-panel.active{grid-template-columns:1fr}
+    .scen-matrix{grid-template-columns:1fr}
+    .flow-grid{grid-template-columns:1fr}
+    .flow-step{border-right:0; border-bottom:1px solid var(--line)}
+    .takeaway-pull{grid-template-columns:1fr}
+    .brief-bottom{grid-template-columns:1fr}
+    .tool-row{grid-template-columns:1fr 1fr}
+    .tool-item:nth-child(2){border-right:0}
+    .tool-item:nth-child(1), .tool-item:nth-child(2){border-bottom:1px solid var(--line)}
+    .brief{padding:60px 36px}
+    .top-nav{display:none}
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ TOPBAR ============ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="logo"></div>
+      <span>Cisco · Seller Enablement / Confidential</span>
+    </div>
+    <nav class="top-nav">
+      <a href="#pitch">The Pitch</a>
+      <a href="#landscape">Landscape</a>
+      <a href="#wedge">The Wedge</a>
+      <a href="#objections">Objections</a>
+      <a href="#brief">Brief</a>
+    </nav>
+    <div class="top-stamp">Battle Card · Q2 / 2026</div>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="wrap">
+    <div class="hero-kicker">
+      <span class="pill meraki">Meraki MX</span>
+      <span>×</span>
+      <span class="pill te">ThousandEyes</span>
+      <span style="margin-left:16px">Seller Battle Card · SD-WAN</span>
+    </div>
+    <h1 class="hero-title">
+      <span class="line">Your competitors'</span>
+      <span class="line"><em>digital experience</em> ends</span>
+      <span class="line">at <span class="hl">their own overlay</span>.</span>
+    </h1>
+    <p class="hero-sub">
+      Every major SD-WAN vendor now markets some version of "digital experience monitoring." That's table stakes. The conversation is no longer <em>whether</em> the box sees the network — it's <strong>how far past the box it can see, and whose data you'd bet the incident ticket on.</strong> This is your field guide to having that conversation.
+    </p>
+
+    <div class="tool-row">
+      <div class="tool-item">
+        <div class="n">01 — THE SITUATION</div>
+        <div class="t">Every rival has <em>a</em> DEM. Only Meraki has <em>the</em> DEM.</div>
+      </div>
+      <div class="tool-item">
+        <div class="n">02 — THE WEDGE</div>
+        <div class="t">Independent visibility <em>past</em> the vendor's overlay.</div>
+      </div>
+      <div class="tool-item">
+        <div class="n">03 — THE EVIDENCE</div>
+        <div class="t">271 cities. BGP. DNS. The whole internet.</div>
+      </div>
+      <div class="tool-item">
+        <div class="n">04 — THE CLOSE</div>
+        <div class="t">One-click activation from the Meraki dashboard.</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ SECTION 1: THE PITCH ============ -->
+<section id="pitch" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 01 — The Thirty-Second Pitch</div>
+    <h2 class="sec-title">Three sentences. <em>In any order.</em></h2>
+    <p class="sec-lede">
+      Before a deep dive into features, seat yourself with the core message. These three ideas are the skeleton of every Meraki MX + ThousandEyes conversation. If the customer takes only one thing away, make it one of these.
+    </p>
+  </div>
+
+  <div class="pitch-grid reveal">
+    <div class="pitch-card">
+      <div class="num">01</div>
+      <h3>The only SD-WAN appliance that runs a <em>category-leading</em> Internet intelligence platform natively.</h3>
+      <p>Fortinet has FortiMonitor. Aruba has ADEM-equivalent in EdgeConnect SASE. Palo Alto has Autonomous DEM. Versa has Versa DEM. All are <strong>vendor-bundled, vendor-collected, vendor-validated.</strong> ThousandEyes is Cisco's, yes — but it's the independent standard the rest of the industry is trying to emulate.</p>
+      <div class="tag">Independent · Third-party-trusted</div>
+    </div>
+
+    <div class="pitch-card">
+      <div class="num">02</div>
+      <h3>Visibility past the overlay, <em>not just inside it</em>.</h3>
+      <p>Competitor DEM tools see what their own agents and endpoints see. ThousandEyes correlates that with <strong>cloud agents in 271 cities, BGP route monitoring from dozens of global collectors, DNS integrity checks, and SaaS provider health.</strong> When the ISP or a CDN is at fault, you know — and you can prove it.</p>
+      <div class="tag">External · Corroborating</div>
+    </div>
+
+    <div class="pitch-card">
+      <div class="num">03</div>
+      <h3>Zero-hardware deployment. <em>Minutes, not quarters.</em></h3>
+      <p>One checkbox in the Meraki dashboard activates a ThousandEyes Enterprise Agent on the MX. No appliance. No VM. No new rack space. Mass-activate across hundreds of sites in a morning. Pre-built templates for M365, Webex, Salesforce, Zoom. <strong>The fastest DEM deployment in SD-WAN.</strong></p>
+      <div class="tag">Operational · Fast-to-value</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 2: SELLER TAKEAWAY ============ -->
+<section class="wrap">
+  <div class="takeaway reveal">
+    <div class="takeaway-label">§ Seller Mindset · Read Before Every Call</div>
+    <h2>
+      The customer <em>has already heard</em> that every SD-WAN vendor does DEM.<br/>
+      Don't argue otherwise. <span class="hl">Argue that DEM quality isn't equal</span> — and the quality gap is the<br/>story of a decade of ThousandEyes internet-measurement primacy.
+    </h2>
+    <div class="takeaway-pull">
+      <div>
+        <div class="label">Don't say</div>
+        <div class="say">"Only Cisco has digital experience monitoring."</div>
+      </div>
+      <div>
+        <div class="label">Do say</div>
+        <div class="say">"Every vendor has <em>a</em> DEM. We have <em>the</em> DEM — and we're the only SD-WAN where it comes built in."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 3: COMPETITOR LANDSCAPE ============ -->
+<section id="landscape" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 02 — Know The Field</div>
+    <h2 class="sec-title">Four competitors, four DEM stories. <em>Each has a real seam.</em></h2>
+    <p class="sec-lede">
+      Walk in respecting what each vendor has built. Then know the seam. Each competitor's DEM is technically credible — and each has a specific blind spot or trade-off you can pressure-test without being dismissive.
+    </p>
+  </div>
+
+  <div class="land-grid reveal">
+    <div class="land-col fortinet">
+      <div class="vendor-chip">Fortinet</div>
+      <div class="vendor">FortiGate + FortiMonitor</div>
+      <div class="dem-name">SaaS-based DEM · Synthetic + endpoint</div>
+
+      <h5>What it is</h5>
+      <p>FortiMonitor is a legitimate SaaS DEM acquired (via Panopta) and integrated into Fortinet's Security Fabric. Does synthetic transaction monitoring, DNS/TLS/RTT metrics, SD-WAN underlay monitoring.</p>
+
+      <h5>The seam</h5>
+      <p>FortiMonitor is an acquisition still being knitted into the broader fabric. Synthetic tests run from Fortinet's probes, not a global, independent vantage network. No BGP route intelligence. Less trusted as a third-party escalation source with ISPs.</p>
+
+      <div class="verdict">"Good telemetry inside Fortinet's world — thin outside it."</div>
+    </div>
+
+    <div class="land-col aruba">
+      <div class="vendor-chip">HPE Aruba</div>
+      <div class="vendor">EdgeConnect SD-WAN</div>
+      <div class="dem-name">DEM inside Unified SASE</div>
+
+      <h5>What it is</h5>
+      <p>HPE Aruba bundles DEM into its EdgeConnect SASE platform alongside ZTNA, SWG, and CASB. Offers real-time path monitoring, per-underlay loss/latency/jitter, and application identification.</p>
+
+      <h5>The seam</h5>
+      <p>DEM is tied to the Unified SASE subscription — most compelling when customer buys the full HPE Aruba stack. Stronger on appliance and uplink telemetry than on global internet intelligence. No native BGP monitoring, no independent global vantage mesh.</p>
+
+      <div class="verdict">"Credible SASE-native DEM. Not an internet intelligence platform."</div>
+    </div>
+
+    <div class="land-col palo">
+      <div class="vendor-chip">Palo Alto</div>
+      <div class="vendor">Prisma SD-WAN + ADEM</div>
+      <div class="dem-name">Autonomous DEM · SASE-native</div>
+
+      <h5>What it is</h5>
+      <p>ADEM is the strongest DEM story among rivals — built into Prisma SASE, GlobalProtect, and Prisma SD-WAN (ION) devices. Endpoint agents, synthetic tests, hop-by-hop path analysis across overlay and underlay. Recently extended via Universal Agents to non-Palo branches.</p>
+
+      <h5>The seam</h5>
+      <p>ADEM is excellent <strong>inside the Prisma Access / SASE funnel</strong>. Its external internet visibility is indirect — no BGP route intelligence, no independent global collector network, no equivalent of ThousandEyes' Internet Outages Map. DEM is a licensed add-on, not a natively-running agent.</p>
+
+      <div class="verdict">"The closest rival. Still vendor-internal where it matters most."</div>
+    </div>
+
+    <div class="land-col versa">
+      <div class="vendor-chip">Versa</div>
+      <div class="vendor">Versa Secure SD-WAN</div>
+      <div class="dem-name">Versa DEM · Unified SASE</div>
+
+      <h5>What it is</h5>
+      <p>Versa DEM runs on the Versa Client and VCG/CPE, exports metrics to Versa Analytics, produces a 1-100 DEM rank per user/device. Covers Wi-Fi, local, SD-WAN, internet, app segments.</p>
+
+      <h5>The seam</h5>
+      <p>Entirely inside Versa's Analytics engine — strong on user experience scoring, weaker on independent external validation. No BGP monitoring. No global cloud agent mesh. Smaller installed base of measurement points than ThousandEyes or even ADEM.</p>
+
+      <div class="verdict">"Strong analytics. Small measurement footprint outside its own gateways."</div>
+    </div>
+  </div>
+
+  <p class="mono reveal" style="margin-top:36px; font-size:11px; color:var(--ink-faint); letter-spacing:.1em; line-height:1.7">
+    // All four vendors have credible DEM offerings. This is important — never claim rivals have no DEM. The seller's wedge is in the next section.
+  </p>
+</section>
+
+<!-- ============ SECTION 4: THE WEDGE (HONEST TABLE) ============ -->
+<section id="wedge" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 03 — The Wedge</div>
+    <h2 class="sec-title">Where ThousandEyes stops being comparable <em>and starts being uncontested</em>.</h2>
+    <p class="sec-lede">
+      This is the part of the matrix where the feature lists stop matching. Everyone can monitor their own links. Very few can independently measure the internet itself — and only one ships that capability natively inside an SD-WAN appliance.
+    </p>
+  </div>
+
+  <div class="wedge-intro reveal">
+    <div class="icon-box">§</div>
+    <div class="content">
+      <h4>Frame this table carefully.</h4>
+      <p>For the first three rows (the baseline SD-WAN DEM capabilities), competitors are legitimately competitive. Don't pretend otherwise. Rows four through seven are where the conversation shifts — these are the capabilities that only ThousandEyes brings, and they're exactly what customers need when the problem isn't inside their own network.</p>
+    </div>
+  </div>
+
+  <div class="wedge-table reveal">
+    <div class="wedge-head">
+      <div class="th">Capability</div>
+      <div class="th us">Meraki MX + ThousandEyes</div>
+      <div class="th">Fortinet</div>
+      <div class="th">Aruba EdgeConnect</div>
+      <div class="th">Palo Alto Prisma</div>
+      <div class="th">Versa</div>
+    </div>
+
+    <!-- BASELINE — competitive -->
+    <div class="wedge-row">
+      <div class="td cap">SD-WAN link telemetry<span class="sub">Loss, latency, jitter per underlay</span></div>
+      <div class="td us"><span class="mark yes">Native</span><span class="mark-detail">Meraki Insight + ThousandEyes correlation</span></div>
+      <div class="td"><span class="mark yes">Native</span><span class="mark-detail">FortiOS SD-WAN + FortiMonitor</span></div>
+      <div class="td"><span class="mark yes">Native</span><span class="mark-detail">EdgeConnect per-underlay metrics</span></div>
+      <div class="td"><span class="mark yes">Native</span><span class="mark-detail">ION device + ADEM</span></div>
+      <div class="td"><span class="mark yes">Native</span><span class="mark-detail">Versa Analytics · VLS scoring</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">SaaS app synthetic testing<span class="sub">M365, Salesforce, Zoom, Webex</span></div>
+      <div class="td us"><span class="mark best">Best-in-class</span><span class="mark-detail">Pre-built templates. One-click mass activation across sites.</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">FortiMonitor synthetic checks</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">DEM in Unified SASE</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">ADEM synthetic tests</span></div>
+      <div class="td"><span class="mark partial">Limited</span><span class="mark-detail">Endpoint-centric; weaker synthetic</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">Endpoint / user experience agent<span class="sub">What the employee actually sees</span></div>
+      <div class="td us"><span class="mark yes">Yes</span><span class="mark-detail">ThousandEyes Endpoint Agent</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">FortiMonitor endpoint agent</span></div>
+      <div class="td"><span class="mark partial">Partial</span><span class="mark-detail">Tied to EdgeConnect SASE stack</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">GlobalProtect + ADEM</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Versa Client</span></div>
+    </div>
+
+    <!-- DIVIDER / THE WEDGE BEGINS -->
+    <div class="wedge-row" style="background:var(--bg-ink); color:white">
+      <div class="td" style="font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--te); border-right-color:#1F3A5F; grid-column:1/-1; padding:14px 18px;">
+        ↓ Below this line, parity ends
+      </div>
+    </div>
+
+    <!-- WEDGE -->
+    <div class="wedge-row">
+      <div class="td cap">Independent global vantage network<span class="sub">Probe sites not owned by the SD-WAN vendor</span></div>
+      <div class="td us"><span class="mark best">271 cities</span><span class="mark-detail">Cloud Agents on Tier 1/2/3 ISPs, broadband, cloud regions</span></div>
+      <div class="td"><span class="mark partial">Global probes</span><span class="mark-detail">FortiMonitor probes — smaller footprint</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Telemetry from Aruba devices only</span></div>
+      <div class="td"><span class="mark partial">Prisma PoPs</span><span class="mark-detail">SASE compute locations, not independent ISP probes</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Gateway + client only</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">BGP route monitoring<span class="sub">Detect internet-wide routing failures</span></div>
+      <div class="td us"><span class="mark best">Native</span><span class="mark-detail">Dozens of global BGP collectors, RPKI validation, stuck-route detection</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not in FortiMonitor</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not in EdgeConnect</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not in ADEM</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not in Versa DEM</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">DNS service intelligence<span class="sub">Authoritative DNS, resolution integrity</span></div>
+      <div class="td us"><span class="mark best">Native</span><span class="mark-detail">DNS+ tests, hijack/misconfiguration detection</span></div>
+      <div class="td"><span class="mark partial">Basic</span><span class="mark-detail">Resolution-time metrics only</span></div>
+      <div class="td"><span class="mark partial">Basic</span><span class="mark-detail">Uplink probes</span></div>
+      <div class="td"><span class="mark partial">Basic</span><span class="mark-detail">Part of ADEM's segment analysis</span></div>
+      <div class="td"><span class="mark partial">Basic</span><span class="mark-detail">As part of app-segment breakdown</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">Global internet outage correlation<span class="sub">See CDN, cloud, or carrier failures in real time</span></div>
+      <div class="td us"><span class="mark best">Yes</span><span class="mark-detail">Internet Outages Map · AI-powered collective intelligence from billions of daily measurements</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not available</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not available</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not available</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not available</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">Evidence-grade data for ISP escalation<span class="sub">Data the carrier can't dismiss</span></div>
+      <div class="td us"><span class="mark best">Industry standard</span><span class="mark-detail">ThousandEyes data is routinely cited by Fortune 500 IT, hyperscalers, and media in outage post-mortems</span></div>
+      <div class="td"><span class="mark partial">Internal</span><span class="mark-detail">Fortinet-owned telemetry</span></div>
+      <div class="td"><span class="mark partial">Internal</span><span class="mark-detail">Aruba-owned telemetry</span></div>
+      <div class="td"><span class="mark partial">Internal</span><span class="mark-detail">Palo Alto-owned telemetry</span></div>
+      <div class="td"><span class="mark partial">Internal</span><span class="mark-detail">Versa-owned telemetry</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">Native activation on SD-WAN device<span class="sub">Zero additional hardware / VMs</span></div>
+      <div class="td us"><span class="mark best">One-click</span><span class="mark-detail">Enterprise Agent runs in container on MX67+; Meraki Dashboard mass-activation</span></div>
+      <div class="td"><span class="mark partial">External</span><span class="mark-detail">Collector appliances / cloud service</span></div>
+      <div class="td"><span class="mark partial">Integrated</span><span class="mark-detail">Bundled in Unified SASE licensing</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">ADEM agent on ION device (DEM is licensed add-on)</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">On VCG / SD-WAN CPE</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 5: DIFFERENTIATORS ============ -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 04 — Four Talking Points You Own</div>
+    <h2 class="sec-title">The differentiators that don't <em>have</em> an equivalent on the other side.</h2>
+    <p class="sec-lede">
+      These four points are what the competitor simply cannot match at feature parity. When you're in a deal and need to create genuine separation, these are the weapons. They also happen to be verifiable, not marketing.
+    </p>
+  </div>
+
+  <div class="diff-list reveal">
+    <div class="diff-item">
+      <div class="n">I.</div>
+      <div class="title">The measurement mesh <em>your customer's network is already part of</em>.</div>
+      <div class="desc">ThousandEyes' 271-city Cloud Agent network has been measuring the public internet since 2010. Every new Meraki MX site plugs into that existing mesh. Your customer instantly benefits from the same vantage points that Netflix, Microsoft, and the Fortune 100 use to validate their internet experience. <strong>No competitor has a network of this scale or age.</strong><div class="tag">Seller line: "The internet's memory is already on our side."</div></div>
+    </div>
+
+    <div class="diff-item">
+      <div class="n">II.</div>
+      <div class="title">BGP and DNS are monitored <em>natively</em> — not as an afterthought.</div>
+      <div class="desc">When the problem is a stuck BGP route affecting your customer's M365 tenant, or a DNS hijack impacting their payment processor, ThousandEyes sees it. Competitor DEMs are blind to these categories entirely. This matters because <strong>40–60% of impactful "is it us?" outages in 2026 trace back to BGP, DNS, or carrier-layer events, not to device failures.</strong><div class="tag">Seller line: "When the internet breaks, we saw it first."</div></div>
+    </div>
+
+    <div class="diff-item">
+      <div class="n">III.</div>
+      <div class="title">Independence from the SD-WAN vendor <em>is the feature</em>.</div>
+      <div class="desc">When a customer's board asks "are you sure it's not our SD-WAN vendor's problem?", ThousandEyes' data carries weight precisely because its measurement methodology predates the Cisco acquisition and remains the third-party industry standard. <strong>Competitor DEMs are, by definition, the vendor grading its own homework.</strong><div class="tag">Seller line: "We're the only SD-WAN that ships its own auditor."</div></div>
+    </div>
+
+    <div class="diff-item">
+      <div class="n">IV.</div>
+      <div class="title">The deployment experience <em>is genuinely trivial</em>.</div>
+      <div class="desc">On MX67 or higher, running firmware 18.104+, activation is a checkbox in the Meraki dashboard. The Enterprise Agent runs in a container inside MX firmware, uses its own internal stack, and doesn't touch data-plane traffic. <strong>Compare to standing up FortiMonitor collectors, licensing ADEM add-ons, or deploying Versa Clients — this is a morning, not a project plan.</strong><div class="tag">Seller line: "Checkbox. Done. Monitoring live."</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 6: OBJECTION SIMULATOR ============ -->
+<section class="wrap" id="objections">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 05 — Objection Handling</div>
+    <h2 class="sec-title">What they'll push back with. <em>And what you say next.</em></h2>
+    <p class="sec-lede">
+      The customer has done their homework. They will raise legitimate counter-arguments — pricing, vendor lock-in, overlap with tools they already own. Here's how to respond without over-promising and without retreating.
+    </p>
+  </div>
+
+  <div class="sim-frame reveal">
+    <div class="sim-intro">Tap a scenario. Each one has the customer's actual likely objection on the left, and the response you should <em>actually</em> give on the right.</div>
+
+    <div class="sim-tabs" id="simTabs">
+      <button class="sim-tab active" data-sim="0">Price pushback</button>
+      <button class="sim-tab" data-sim="1">"We have FortiMonitor"</button>
+      <button class="sim-tab" data-sim="2">"ADEM does the same"</button>
+      <button class="sim-tab" data-sim="3">"We use Datadog"</button>
+      <button class="sim-tab" data-sim="4">"Sounds like lock-in"</button>
+      <button class="sim-tab" data-sim="5">License gating</button>
+    </div>
+
+    <div class="sim-panel active" data-panel="0">
+      <div class="sim-q">
+        <div class="role">Prospect · CIO</div>
+        <div class="msg">"Our Fortinet quote is 25% cheaper. Meraki's already a premium — why should I pay more for another layer?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Reframe from hardware cost to incident cost.</strong> One severe SaaS degradation — a sluggish M365 quarter-close, a Salesforce failure during peak — runs six figures in lost productivity and IT time. ThousandEyes isn't "another layer" — it's the one capability that turns a 4-hour war room into a 20-minute root-cause confirmation with evidence you can hand to the ISP.
+          <div class="punch">"Your Fortinet savings disappear on the first major outage where you can't prove it wasn't you."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="1">
+      <div class="sim-q">
+        <div class="role">Prospect · Network Director</div>
+        <div class="msg">"We already use FortiMonitor. It does synthetic tests, it does SD-WAN monitoring. What's different?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Agree, then draw the line.</strong> FortiMonitor is a capable tool inside Fortinet's fabric. But ask two questions: <em>"When the ISP blames you, whose data do you show them — Fortinet's, or the internet's independent standard?"</em> and <em>"Does FortiMonitor tell you when BGP announces a stuck route affecting your tenant, or when a CDN degrades for a region you care about?"</em>
+          <div class="punch">"FortiMonitor watches your network. ThousandEyes watches the internet. You need both — and we ship one of them in the box."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="2">
+      <div class="sim-q">
+        <div class="role">Prospect · CTO</div>
+        <div class="msg">"Palo Alto tells me ADEM does hop-by-hop path analysis, endpoint agents, synthetic tests. Isn't that the same thing?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Acknowledge ADEM's real strength — then expose the scope.</strong> ADEM is the closest rival — don't dismiss it. But ADEM's visibility is optimized for <em>traffic that traverses Prisma Access</em>. It's Palo Alto watching Palo Alto's SASE delivery path. ThousandEyes runs independent measurement across the <em>entire</em> public internet — regardless of whether traffic touches Cisco infrastructure. And critically, <strong>ADEM has no BGP monitoring and no global outage map.</strong>
+          <div class="punch">"ADEM tells you about Prisma's delivery. ThousandEyes tells you about the whole internet — including Prisma."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="3">
+      <div class="sim-q">
+        <div class="role">Prospect · Platform Lead</div>
+        <div class="msg">"We already use Datadog / New Relic for observability. Isn't ThousandEyes redundant?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Draw the distinction cleanly.</strong> Datadog and New Relic excel at APM — what's happening <em>inside</em> your applications and code. ThousandEyes tells you what's happening <em>between</em> the user and the app — the network, ISP, BGP, DNS layer. They're complementary, not overlapping. Datadog tells you a request took 800ms; ThousandEyes tells you 600ms of that was a congested transit provider in São Paulo.
+          <div class="punch">"APM answers 'why is my app slow.' ThousandEyes answers 'is it even my app's fault.'"</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="4">
+      <div class="sim-q">
+        <div class="role">Prospect · Procurement</div>
+        <div class="msg">"Cisco buying ThousandEyes makes this sound like lock-in. Can we use it without Meraki MX?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Answer truthfully — this is a strength.</strong> Yes, absolutely. ThousandEyes runs standalone on Cisco ISR/ASR, Catalyst 8000, as a standalone Enterprise Agent on Linux, in VMs, and has non-Cisco customers across every industry. The Meraki MX integration is a zero-friction <em>deployment</em> advantage — not a lock-in mechanism. It's exactly the opposite of the Palo Alto model, where ADEM is tightly coupled to Prisma.
+          <div class="punch">"The integration makes adoption easy; the product itself is completely portable."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="5">
+      <div class="sim-q">
+        <div class="role">Prospect · IT Director</div>
+        <div class="msg">"What license do we actually need? I've heard ThousandEyes is gated behind premium SD-WAN tiers."</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Be precise — customers hate vague license answers.</strong> Native ThousandEyes on Meraki MX requires either <strong>Secure SD-WAN Plus</strong> (which includes ThousandEyes test units as part of the subscription) or <strong>Advanced Security</strong> (which enables the integration; test units can be added as needed). Supported on MX67 and above, firmware 18.104+. Activation is in the Meraki dashboard under the Insight tab.
+          <div class="punch">"Plus tier — it's built in. Advanced Security — it's one add-on away. Either way, no separate procurement cycle."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 7: SCENARIO MATRIX ============ -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 06 — Six Customer Scenarios</div>
+    <h2 class="sec-title">When the customer asks "what would this actually <em>do</em> for us?"</h2>
+    <p class="sec-lede">
+      Match the prospect's pain to one of these. Each scenario is a real customer conversation pattern — and each one has a clean outcome story you can walk them through. Use these in discovery, not just pitch.
+    </p>
+  </div>
+
+  <div class="scen-matrix reveal">
+    <div class="scen-card">
+      <div class="ico">i</div>
+      <h4>"Teams calls keep dropping for the east coast."</h4>
+      <p class="situation">Intermittent, regional, no obvious cause. Owned infrastructure looks healthy. Half your help desk is convinced it's Microsoft, the other half thinks it's the ISP.</p>
+      <div class="outcome"><strong>Outcome:</strong> Endpoint Agent + Cloud Agent correlation isolates packet loss to a specific upstream peer on one ISP. Evidence to escalate.</div>
+      <div class="teaser">// Use with: hybrid workforce accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">ii</div>
+      <h4>"We're not sure if it's AWS or us."</h4>
+      <p class="situation">Critical app hosted in AWS us-east-1. Latency spikes intermittently. AWS status is green. Internal team is paralyzed without independent evidence.</p>
+      <div class="outcome"><strong>Outcome:</strong> BGP monitoring + Cloud Agents in multiple regions show the degradation is AWS-side and regional. You make a defensible failover decision.</div>
+      <div class="teaser">// Use with: AWS-heavy accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">iii</div>
+      <h4>"Our retail POS drops at peak hours."</h4>
+      <p class="situation">Store traffic to payment processor degrades during checkout peaks. No device alerts. No capacity issue on the uplinks. Revenue impact is measurable.</p>
+      <div class="outcome"><strong>Outcome:</strong> Path visualization from 200+ store MX agents reveals peak-hour congestion at a specific transit provider. Routing change resolves within a day.</div>
+      <div class="teaser">// Use with: retail / multi-site accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">iv</div>
+      <h4>"SaaS vendor says the problem is on our end."</h4>
+      <p class="situation">ServiceNow / Workday / ADP claims their service is healthy; half your users say it's unusable. Internal team is the default scapegoat.</p>
+      <div class="outcome"><strong>Outcome:</strong> Cloud Agents in 12 regions confirm degradation in 4 of them. Data exported to the vendor changes the conversation inside 30 minutes.</div>
+      <div class="teaser">// Use with: heavily SaaS-dependent accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">v</div>
+      <h4>"We keep getting paged at 2 AM for SaaS outages."</h4>
+      <p class="situation">Help desk is drowning in tickets when external services degrade. No centralized visibility into third-party dependencies.</p>
+      <div class="outcome"><strong>Outcome:</strong> Internet Outages Map + proactive alerts tell IT about CDN, DNS, or cloud provider issues <em>before</em> users do. Ticket volume drops measurably.</div>
+      <div class="teaser">// Use with: operations-mature accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">vi</div>
+      <h4>"We want one tool for branch assurance, not five."</h4>
+      <p class="situation">Current stack: Meraki dashboard for devices, a separate APM vendor, an ISP monitoring script, a DNS checker, and a ticketing correlation tool. Tool sprawl is the actual problem.</p>
+      <div class="outcome"><strong>Outcome:</strong> ThousandEyes on MX collapses three of those tools into one. Deployment is a checkbox. Existing Meraki dashboard becomes the branch assurance console.</div>
+      <div class="teaser">// Use with: cost-conscious consolidators</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 8: FAQ / OBJECTIONS ============ -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 07 — Rapid-Fire FAQ</div>
+    <h2 class="sec-title">The quick ones. <em>Click to reveal.</em></h2>
+    <p class="sec-lede">
+      Answers to the questions that tend to come up in the last five minutes of a call, when the customer is deciding whether to schedule a second meeting.
+    </p>
+  </div>
+
+  <div class="obj-list reveal" id="objList">
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Which Meraki MX models support this?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p><strong>MX67 and above</strong>, running firmware <strong>18.104 or later</strong>. Older MX models don't have container resources for the Enterprise Agent. If the customer is on an older MX, position this as part of the refresh conversation — the integration is genuinely a refresh driver.</p>
+        <div class="evidence"><strong>Source</strong>Meraki MX ThousandEyes Configuration Guide · documentation.meraki.com</div>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Does the agent interfere with data-plane traffic?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>No. The Enterprise Agent uses the MX's internal networking stack (198.51.x.x reserved space) and doesn't touch customer traffic unless it's specifically testing a LAN-side server or calling back to the ThousandEyes dashboard. This is a deliberate architectural choice documented by the product team.</p>
+        <div class="evidence"><strong>Source</strong>Meraki + ThousandEyes Integration Troubleshooting Guide · documentation.meraki.com</div>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Do customers have to set up a new ThousandEyes account?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>If they don't have one, the onboarding flow creates and links the account group as part of first activation. If they already use ThousandEyes, the integration links the existing account group. It's one guided workflow either way, inside the Meraki dashboard.</p>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Can MSPs deploy this on behalf of customers?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Yes — this is a <em>key</em> MSP story. Partners can mass-activate agents across all customer organizations they manage in the Meraki dashboard, with per-customer ThousandEyes account linkage. For MSPs, this eliminates the previous burden of standing up dedicated VM-based agents per customer network.</p>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"What's the pre-built test template library cover?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Out of the box: <strong>Microsoft 365, Salesforce, Webex by Cisco, Zoom, Google Workspace</strong>, and common web properties. Custom tests for internal apps are configurable via the ThousandEyes dashboard after activation. For sales demos, the M365 template is the most universally resonant.</p>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"How does this compare to standalone ThousandEyes?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Same product, same dashboard, same data pipeline. The MX-native deployment uses a purpose-built version of the Enterprise Agent engineered to run in the MX's container environment. Feature parity for active monitoring tests is effectively complete; customers who need <em>BGP test types</em> specifically still need a traditional BGP monitor, but that's rare for branch-site use cases.</p>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Can we do a proof of value before a commercial decision?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Yes. Trial accounts for Advanced Security and SD-WAN Plus include the ThousandEyes integration — customers can activate on trial MX devices and generate real data inside their own environment before committing. This is a powerful POV motion: activate, run for two weeks, and the data will frequently <em>itself</em> produce the buying case.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 9: SELLER WORKFLOW ============ -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 08 — How To Run The Play</div>
+    <h2 class="sec-title">Four moves. <em>In this order.</em></h2>
+    <p class="sec-lede">
+      A concrete seller motion. This flow has been observed to convert discovery into committed POV inside two meetings for mid-market and enterprise accounts alike.
+    </p>
+  </div>
+
+  <div class="flow-grid reveal">
+    <div class="flow-step">
+      <div class="step-num">Move 01 · Discover</div>
+      <div class="step-title">Find the last painful outage.</div>
+      <div class="step-desc">Don't pitch DEM. Ask about their last major "is it us or them?" incident. How long did it take to isolate? Who was in the war room? Was the ISP helpful?</div>
+      <div class="step-prompt">"Tell me about the last time your team spent more than an hour on a finger-pointing call with a carrier or SaaS vendor."</div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">Move 02 · Diagnose</div>
+      <div class="step-title">Surface the scope gap.</div>
+      <div class="step-desc">Without naming products, surface the capability they're missing: independent internet intelligence. Use the landscape framework above — validate their current tooling, then show where it ends.</div>
+      <div class="step-prompt">"Your current stack tells you your equipment is healthy. What tells you the internet itself isn't the problem?"</div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">Move 03 · Demonstrate</div>
+      <div class="step-title">Show the dashboard, not the slideware.</div>
+      <div class="step-desc">A live Meraki dashboard demo with ThousandEyes Insight tab activated is worth twenty minutes of slides. Show one-click activation, the test template library, and a path-viz of an M365 test.</div>
+      <div class="step-prompt">"Let me just toggle this on in a lab account and show you — 90 seconds."</div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">Move 04 · Deploy POV</div>
+      <div class="step-title">Activate on their trial.</div>
+      <div class="step-desc">Don't wait for a formal procurement. Offer a zero-cost activation on trial licenses for 2-4 weeks. Come back with real data from <em>their</em> environment. The data closes the deal.</div>
+      <div class="step-prompt">"Give me two weeks on a trial license. I'll come back with a report on what's actually happening to your M365 traffic right now."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 10: CLOSING BRIEF ============ -->
+<section id="brief" class="wrap">
+  <div class="brief reveal">
+    <div class="brief-label">§ Closing Brief · What To Remember</div>
+    <h2>
+      Everyone else sells <em>an SD-WAN with monitoring</em>.<br/>
+      You sell <span class="hl">the SD-WAN with the internet's</span><br/>
+      <span class="hl">measurement standard built in.</span>
+    </h2>
+
+    <div class="brief-bottom">
+      <div class="brief-msg">
+        <h4>If the customer remembers one sentence</h4>
+        <p>"Every rival has a DEM. Meraki MX is the only SD-WAN where the category-leading internet intelligence platform runs natively inside the appliance — no extra hardware, no extra vendor, no extra project."</p>
+      </div>
+      <div class="brief-meta">
+        <strong>Target customer:</strong><br/>
+        Hybrid + multi-site.<br/>
+        SaaS-dependent.<br/>
+        Previously burned by a "not us, not them" outage.<br/><br/>
+        <strong>Avg. deal motion:</strong><br/>
+        2 meetings to POV.<br/>
+        2 weeks of real data.<br/>
+        The data closes.<br/><br/>
+        <strong>Hero proof points:</strong><br/>
+        271 cities · BGP · DNS · zero hardware
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap foot-inner">
+    <div class="left">
+      Seller enablement material. Internal Cisco use. All competitor capabilities sourced from public vendor documentation (fortinet.com/FortiMonitor, hpe.com/Aruba EdgeConnect QuickSpecs, docs.paloaltonetworks.com/autonomous-dem, versa-networks.com/dem), Meraki + ThousandEyes integration docs (documentation.meraki.com/MI/ThousandEyes, thousandeyes.com/integrations/meraki-mx), and analyst research (Gartner Peer Insights, G2, PeerSpot) current to Q2 2026. Present competitor strengths accurately; the wedge is in the internet-intelligence layer.
+    </div>
+    <div style="text-align:right; min-width:220px">
+      Battle Card · Rev 1.0<br/>
+      Meraki MX × ThousandEyes<br/>
+      Confidential · Cisco Internal
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveals
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('in');
+    });
+  }, {threshold: 0.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Simulator tabs
+  const simTabs = document.querySelectorAll('.sim-tab');
+  const simPanels = document.querySelectorAll('.sim-panel');
+  simTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const i = tab.dataset.sim;
+      simTabs.forEach(t => t.classList.remove('active'));
+      simPanels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.sim-panel[data-panel="${i}"]`).classList.add('active');
+    });
+  });
+
+  // Objection accordion
+  document.querySelectorAll('.obj-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.closest('.obj-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.obj-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+</script>
+
+</body>
+</html>
