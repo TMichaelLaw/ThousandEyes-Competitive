@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ThousandEyes vs. Auvik — An Architectural Divide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;0,9..144,900;1,9..144,400&family=JetBrains+Mono:wght@300;400;500;700&family=Inter+Tight:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#07080b;
+    --bg-2:#0c0e14;
+    --panel:#111319;
+    --ink:#f3f1ea;
+    --ink-dim:#9b9a93;
+    --ink-dimmer:#575651;
+    --line:#1d1f27;
+    --line-bright:#2a2d38;
+    --te:#00c6b2;         /* ThousandEyes teal */
+    --te-glow:#00ffe1;
+    --te-deep:#003b36;
+    --auv:#ff6b3d;        /* Auvik orange */
+    --auv-dim:#6b3222;
+    --amber:#f5b841;
+    --violet:#8b6dff;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Inter Tight', sans-serif;
+    font-weight:400;
+    line-height:1.5;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+  /* Grain overlay */
+  body::before{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:1000;
+    opacity:.035;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.9 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  }
+  .mono{font-family:'JetBrains Mono', monospace}
+  .serif{font-family:'Fraunces', serif}
+  h1,h2,h3,h4{font-family:'Fraunces', serif; font-weight:500; letter-spacing:-.02em; line-height:1.02}
+  a{color:inherit}
+
+  /* ---------- LAYOUT ---------- */
+  .wrap{max-width:1280px; margin:0 auto; padding:0 32px}
+
+  /* Nav rail */
+  .rail{
+    position:fixed; top:50%; right:18px; transform:translateY(-50%);
+    z-index:50; display:flex; flex-direction:column; gap:10px;
+  }
+  .rail a{
+    width:8px;height:8px;border-radius:50%;background:#2b2d36;
+    display:block; transition:all .3s ease;
+    border:1px solid transparent;
+  }
+  .rail a:hover{background:var(--te); transform:scale(1.5)}
+  .rail a.active{background:var(--te); box-shadow:0 0 12px var(--te-glow); transform:scale(1.3)}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    min-height:100vh; position:relative; overflow:hidden;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:40px 0 60px;
+  }
+  .hero-grid{
+    position:absolute; inset:0; z-index:0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.025) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.025) 1px, transparent 1px);
+    background-size: 80px 80px;
+    mask-image: radial-gradient(ellipse at 50% 40%, black 30%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at 50% 40%, black 30%, transparent 75%);
+  }
+  .hero-orb{
+    position:absolute; border-radius:50%; filter:blur(100px); opacity:.4;
+    pointer-events:none; z-index:0;
+  }
+  .hero-orb.a{width:600px;height:600px;background:var(--te); top:-200px; left:-150px; animation: float 18s ease-in-out infinite}
+  .hero-orb.b{width:500px;height:500px;background:#6b2020; bottom:-150px; right:-100px; animation: float 22s ease-in-out infinite reverse}
+  @keyframes float{
+    0%,100%{transform:translate(0,0) scale(1)}
+    50%{transform:translate(40px,-30px) scale(1.1)}
+  }
+
+  .hero-top{
+    position:relative; z-index:2;
+    display:flex; justify-content:space-between; align-items:center;
+    font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-dim);
+  }
+  .hero-top .dot{
+    display:inline-block;width:8px;height:8px;border-radius:50%;
+    background:var(--te); margin-right:10px; box-shadow:0 0 12px var(--te-glow);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1; transform:scale(1)}
+    50%{opacity:.5; transform:scale(.85)}
+  }
+
+  .hero-main{ position:relative; z-index:2; margin-top:10vh }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; letter-spacing:.3em; text-transform:uppercase;
+    color:var(--te); margin-bottom:24px;
+    display:flex; align-items:center; gap:16px;
+    opacity:0; animation: rise .8s ease-out .2s forwards;
+  }
+  .eyebrow::before{content:""; width:40px; height:1px; background:var(--te)}
+
+  h1.headline{
+    font-size:clamp(52px, 10vw, 148px);
+    line-height:.9;
+    letter-spacing:-.04em;
+    font-weight:400;
+  }
+  h1.headline .l1, h1.headline .l2, h1.headline .l3{
+    display:block; opacity:0;
+    transform:translateY(40px);
+    animation: rise .9s cubic-bezier(.2,.7,.2,1) forwards;
+  }
+  h1.headline .l1{animation-delay:.3s}
+  h1.headline .l2{animation-delay:.5s; font-style:italic; color:var(--ink-dim); font-weight:300}
+  h1.headline .l3{animation-delay:.7s}
+  .accent-te{color:var(--te)}
+  .accent-auv{color:var(--auv)}
+  .strike{text-decoration:line-through; text-decoration-thickness:2px; text-decoration-color:var(--auv)}
+  @keyframes rise{
+    to{opacity:1; transform:translateY(0)}
+  }
+
+  .hero-sub{
+    margin-top:44px; max-width:640px;
+    font-size:18px; line-height:1.55; color:var(--ink-dim);
+    opacity:0; animation: rise .8s ease-out .9s forwards;
+  }
+  .hero-sub strong{color:var(--ink); font-weight:500}
+
+  .hero-bottom{
+    position:relative; z-index:2; display:grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap:24px; margin-top:60px;
+    border-top:1px solid var(--line); padding-top:28px;
+    opacity:0; animation: rise .8s ease-out 1.1s forwards;
+  }
+  .stat{font-family:'JetBrains Mono', monospace}
+  .stat .n{font-family:'Fraunces', serif; font-size:42px; color:var(--ink); letter-spacing:-.03em; font-weight:500; line-height:1}
+  .stat .n .unit{font-size:18px; color:var(--te); margin-left:3px}
+  .stat .lbl{font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-dim); margin-top:10px}
+
+  /* ---------- SECTION COMMON ---------- */
+  section{position:relative; padding:140px 0}
+  .sec-head{ margin-bottom:80px }
+  .sec-num{
+    font-family:'JetBrains Mono', monospace; font-size:12px;
+    color:var(--te); letter-spacing:.3em; margin-bottom:20px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .sec-num::after{content:""; flex:1; height:1px; background:var(--line)}
+  .sec-title{font-size:clamp(36px, 5vw, 72px); letter-spacing:-.03em; max-width:900px}
+  .sec-title em{font-style:italic; color:var(--ink-dim); font-weight:300}
+  .sec-lede{font-size:17px; color:var(--ink-dim); max-width:620px; margin-top:28px; line-height:1.6}
+
+  .reveal{opacity:0; transform:translateY(30px); transition:all .9s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1; transform:translateY(0)}
+
+  /* ---------- SECTION 1: POSITIONING ---------- */
+  .pos-grid{
+    display:grid; grid-template-columns: 1fr 1fr; gap:0;
+    border-top:1px solid var(--line-bright);
+    border-bottom:1px solid var(--line-bright);
+  }
+  .pos-col{
+    padding:56px 44px;
+    position:relative; min-height:520px;
+    transition:background .4s ease;
+  }
+  .pos-col.auv{
+    background:linear-gradient(180deg, #0a0a0d 0%, #0c0a09 100%);
+    border-right:1px solid var(--line-bright);
+  }
+  .pos-col.te{
+    background:linear-gradient(180deg, #091113 0%, #071514 100%);
+    position:relative;
+  }
+  .pos-col.te::after{
+    content:""; position:absolute; top:0; left:0; width:3px; height:100%;
+    background:linear-gradient(180deg, transparent, var(--te), transparent);
+    box-shadow: 0 0 20px var(--te-glow);
+  }
+  .pos-head{display:flex; align-items:baseline; justify-content:space-between; margin-bottom:40px}
+  .pos-brand{
+    font-family:'Fraunces', serif; font-size:36px; font-weight:500; letter-spacing:-.02em;
+  }
+  .pos-col.te .pos-brand{color:var(--te)}
+  .pos-col.auv .pos-brand{color:var(--auv); opacity:.75}
+  .pos-tag{
+    font-family:'JetBrains Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; padding:5px 10px; border:1px solid var(--line-bright);
+    border-radius:2px; color:var(--ink-dim);
+  }
+  .pos-col.te .pos-tag{border-color:var(--te); color:var(--te)}
+
+  .pos-quote{
+    font-family:'Fraunces', serif; font-size:26px; line-height:1.3;
+    font-weight:400; letter-spacing:-.015em; margin-bottom:40px;
+  }
+  .pos-col.te .pos-quote{color:var(--ink)}
+  .pos-col.auv .pos-quote{color:var(--ink-dim); font-style:italic}
+
+  .pos-list{list-style:none; display:flex; flex-direction:column; gap:14px}
+  .pos-list li{
+    font-size:14px; display:flex; gap:14px; line-height:1.5;
+    padding-bottom:14px; border-bottom:1px dashed var(--line);
+  }
+  .pos-list li:last-child{border-bottom:0}
+  .pos-list li .k{
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:.1em; text-transform:uppercase; color:var(--ink-dimmer);
+    min-width:90px; padding-top:3px;
+  }
+  .pos-list li .v{color:var(--ink-dim); flex:1}
+  .pos-col.te .pos-list li .v{color:var(--ink)}
+
+  /* ---------- SECTION 2: ARCHITECTURE VIS ---------- */
+  .arch-grid{
+    display:grid; grid-template-columns: 1fr 1fr; gap:40px;
+    margin-top:40px;
+  }
+  .arch-card{
+    position:relative; padding:36px;
+    border:1px solid var(--line); border-radius:4px;
+    background:var(--panel);
+    min-height:520px;
+    overflow:hidden;
+  }
+  .arch-card.te{border-color: var(--te-deep)}
+  .arch-card.te::before{
+    content:""; position:absolute; inset:0;
+    background: radial-gradient(circle at 70% 30%, rgba(0,198,178,.08), transparent 60%);
+    pointer-events:none;
+  }
+  .arch-label{
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--ink-dim);
+    margin-bottom:8px;
+  }
+  .arch-title{font-size:24px; margin-bottom:24px; position:relative; z-index:2}
+  .arch-card.te .arch-title{color:var(--te)}
+
+  /* SVG containers */
+  .arch-svg{width:100%; height:auto; display:block; position:relative; z-index:2}
+
+  /* Globe/vantage point pulses */
+  @keyframes ping{
+    0%{r:3; opacity:1}
+    80%{r:20; opacity:0}
+    100%{r:20; opacity:0}
+  }
+  .vp-ping{animation: ping 2.4s ease-out infinite}
+  .vp-ping.d1{animation-delay:0s}
+  .vp-ping.d2{animation-delay:.4s}
+  .vp-ping.d3{animation-delay:.8s}
+  .vp-ping.d4{animation-delay:1.2s}
+  .vp-ping.d5{animation-delay:1.6s}
+  .vp-ping.d6{animation-delay:2.0s}
+  .vp-ping.d7{animation-delay:.6s}
+  .vp-ping.d8{animation-delay:1.4s}
+
+  .path-dash{
+    stroke-dasharray: 4 6;
+    animation: flow 2s linear infinite;
+  }
+  @keyframes flow{
+    to{stroke-dashoffset: -40}
+  }
+
+  .arch-caption{
+    margin-top:24px; font-size:13px; color:var(--ink-dim); line-height:1.6;
+    position:relative; z-index:2;
+  }
+  .arch-caption strong{color:var(--ink); font-weight:500}
+
+  /* ---------- SECTION 3: CAPABILITY MATRIX ---------- */
+  .matrix-controls{
+    display:flex; gap:8px; margin-bottom:32px; flex-wrap:wrap;
+    border-bottom:1px solid var(--line); padding-bottom:20px;
+  }
+  .mc-btn{
+    font-family:'JetBrains Mono', monospace; font-size:11px;
+    letter-spacing:.15em; text-transform:uppercase;
+    background:transparent; color:var(--ink-dim); border:1px solid var(--line-bright);
+    padding:10px 18px; border-radius:2px; cursor:pointer;
+    transition:all .2s ease;
+  }
+  .mc-btn:hover{color:var(--ink); border-color:var(--ink-dim)}
+  .mc-btn.active{color:var(--bg); background:var(--te); border-color:var(--te)}
+
+  .matrix{
+    display:grid; grid-template-columns: 2fr 1fr 1fr; 
+    border:1px solid var(--line-bright); border-radius:4px; overflow:hidden;
+  }
+  .m-head{
+    background:#0d0f15; padding:22px 28px;
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--ink-dim);
+    border-bottom:1px solid var(--line-bright);
+  }
+  .m-head.te{color:var(--te)}
+  .m-head.auv{color:var(--auv); opacity:.9}
+
+  .m-row{
+    display:contents;
+  }
+  .m-cell{
+    padding:22px 28px; border-bottom:1px solid var(--line);
+    font-size:14px; line-height:1.5;
+    transition:background .3s ease;
+  }
+  .m-row:hover .m-cell{background:rgba(255,255,255,.015)}
+  .m-cap{
+    font-family:'Fraunces', serif; font-size:18px; font-weight:500;
+    letter-spacing:-.01em;
+  }
+  .m-cap .sub{
+    display:block; font-family:'Inter Tight', sans-serif; font-size:12px;
+    color:var(--ink-dim); margin-top:4px; font-weight:400;
+  }
+  .m-te{color:var(--ink); border-left:1px solid var(--line)}
+  .m-auv{color:var(--ink-dim); border-left:1px solid var(--line)}
+
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 10px; border-radius:20px;
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:.1em; text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .chip.full{background:rgba(0,198,178,.12); color:var(--te); border:1px solid rgba(0,198,178,.3)}
+  .chip.partial{background:rgba(245,184,65,.12); color:var(--amber); border:1px solid rgba(245,184,65,.3)}
+  .chip.none{background:rgba(255,107,61,.08); color:#b55a3a; border:1px solid rgba(255,107,61,.2)}
+  .chip.native{background:rgba(139,109,255,.12); color:var(--violet); border:1px solid rgba(139,109,255,.3)}
+  .m-detail{display:block; color:var(--ink-dim); font-size:13px}
+  .m-te .m-detail{color:var(--ink)}
+  .m-row:last-child .m-cell{border-bottom:0}
+
+  /* ---------- SECTION 4: BAR RACE ---------- */
+  .race{
+    display:grid; grid-template-columns: 160px 1fr; gap:36px;
+    padding:48px 0;
+  }
+  .race-y{
+    display:flex; flex-direction:column; justify-content:flex-end; gap:36px;
+  }
+  .race-y .cat{
+    font-family:'Fraunces', serif; font-size:17px; text-align:right;
+    letter-spacing:-.01em; line-height:1.2;
+  }
+  .race-y .cat .sub{
+    display:block; font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:.15em; text-transform:uppercase; color:var(--ink-dim);
+    margin-top:4px; font-weight:normal;
+  }
+  .race-bars{display:flex; flex-direction:column; gap:36px}
+  .bar-group{position:relative}
+  .bar{
+    height:32px; border-radius:2px; margin-bottom:8px;
+    position:relative; overflow:hidden;
+    display:flex; align-items:center;
+    transform-origin:left;
+    transition:transform 1.4s cubic-bezier(.2,.7,.2,1), opacity 1.4s ease;
+    transform: scaleX(0);
+    opacity:0;
+  }
+  .race.in .bar{transform: scaleX(1); opacity:1}
+  .bar.te{background:linear-gradient(90deg, var(--te), var(--te-glow)); box-shadow:0 0 40px rgba(0,198,178,.25)}
+  .bar.auv{background:linear-gradient(90deg, var(--auv-dim), var(--auv))}
+  .bar .val{
+    margin-left:auto; padding:0 14px;
+    font-family:'JetBrains Mono', monospace; font-size:12px;
+    color:var(--bg); font-weight:700;
+  }
+  .bar.auv .val{color:var(--ink)}
+  .bar .lbl{
+    padding:0 14px; font-family:'JetBrains Mono', monospace; font-size:11px;
+    color:var(--bg); font-weight:600; letter-spacing:.05em;
+  }
+  .bar.auv .lbl{color:var(--ink)}
+
+  /* stagger */
+  .race.in .bar-group:nth-child(1) .bar{transition-delay:.1s}
+  .race.in .bar-group:nth-child(2) .bar{transition-delay:.25s}
+  .race.in .bar-group:nth-child(3) .bar{transition-delay:.4s}
+  .race.in .bar-group:nth-child(4) .bar{transition-delay:.55s}
+  .race.in .bar-group:nth-child(5) .bar{transition-delay:.7s}
+
+  /* ---------- SECTION 5: SCENARIOS ---------- */
+  .scen-tabs{display:flex; gap:0; margin-bottom:48px; border-bottom:1px solid var(--line-bright); overflow-x:auto}
+  .scen-tab{
+    padding:20px 28px;
+    font-family:'Fraunces', serif; font-size:17px; font-weight:500;
+    color:var(--ink-dim); background:transparent; border:0; cursor:pointer;
+    position:relative; white-space:nowrap;
+    transition: color .3s ease;
+    letter-spacing:-.01em;
+  }
+  .scen-tab:hover{color:var(--ink)}
+  .scen-tab.active{color:var(--te)}
+  .scen-tab.active::after{
+    content:""; position:absolute; bottom:-1px; left:0; right:0; height:2px;
+    background:var(--te); box-shadow:0 0 10px var(--te-glow);
+  }
+  .scen-tab .num{
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    color:var(--ink-dimmer); margin-right:10px; letter-spacing:.1em;
+  }
+
+  .scen-panel{display:none; animation: fadeIn .5s ease}
+  .scen-panel.active{display:grid}
+  @keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px)}
+    to{opacity:1; transform:translateY(0)}
+  }
+  .scen-panel{grid-template-columns: 1.1fr 1fr 1fr; gap:32px}
+
+  .scen-scenario{
+    padding:36px; background:var(--panel);
+    border:1px solid var(--line); border-radius:4px;
+  }
+  .scen-scenario .label{
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--amber);
+    margin-bottom:16px;
+  }
+  .scen-scenario h3{font-size:28px; letter-spacing:-.02em; margin-bottom:20px}
+  .scen-scenario p{font-size:15px; color:var(--ink-dim); line-height:1.65}
+  .scen-story{font-style:italic; font-family:'Fraunces', serif; font-size:16px; color:var(--ink); margin-top:20px; padding-left:16px; border-left:2px solid var(--amber)}
+
+  .scen-col{
+    padding:36px; border-radius:4px; border:1px solid var(--line);
+    background:var(--panel); position:relative;
+  }
+  .scen-col.te{border-color:var(--te-deep); background:linear-gradient(180deg, #0a1513 0%, #081816 100%)}
+  .scen-col.te::before{
+    content:"WINNER"; position:absolute; top:-10px; right:20px;
+    background:var(--te); color:var(--bg);
+    font-family:'JetBrains Mono', monospace; font-size:9px; letter-spacing:.2em;
+    padding:4px 10px; border-radius:2px; font-weight:700;
+  }
+  .scen-col .name{
+    font-family:'Fraunces', serif; font-size:22px; font-weight:500;
+    margin-bottom:18px; letter-spacing:-.01em;
+  }
+  .scen-col.te .name{color:var(--te)}
+  .scen-col.auv .name{color:var(--auv); opacity:.7}
+  .scen-col ul{list-style:none; display:flex; flex-direction:column; gap:12px; font-size:14px; line-height:1.55}
+  .scen-col li{padding-left:20px; position:relative; color:var(--ink)}
+  .scen-col li::before{
+    content:""; position:absolute; left:0; top:9px;
+    width:8px; height:8px; border-radius:50%;
+  }
+  .scen-col.te li::before{background:var(--te); box-shadow:0 0 8px var(--te-glow)}
+  .scen-col.auv li::before{background:var(--ink-dimmer)}
+  .scen-col.auv li{color:var(--ink-dim)}
+  .scen-col .verdict{
+    margin-top:20px; padding-top:20px; border-top:1px solid var(--line);
+    font-family:'JetBrains Mono', monospace; font-size:11px;
+    letter-spacing:.1em; color:var(--ink-dim); line-height:1.5;
+  }
+  .scen-col.te .verdict strong{color:var(--te); font-weight:600}
+  .scen-col.auv .verdict strong{color:var(--auv); font-weight:600}
+
+  /* ---------- SECTION 6: VALUE DIAGRAM ---------- */
+  .val-frame{
+    border:1px solid var(--line-bright); border-radius:4px; padding:64px;
+    background:linear-gradient(180deg, #0a0c12 0%, #06080c 100%);
+    position:relative; overflow:hidden;
+  }
+  .val-frame::before{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(rgba(255,255,255,.015) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.015) 1px, transparent 1px);
+    background-size:40px 40px;
+    pointer-events:none;
+  }
+  .val-stack{display:flex; flex-direction:column; gap:4px; position:relative; z-index:2}
+  .val-layer{
+    padding:24px 32px; display:flex; align-items:center; gap:24px;
+    border-radius:2px;
+    transition: all .4s ease;
+    cursor:default;
+  }
+  .val-layer:hover{transform: translateX(6px)}
+  .val-layer .n{
+    font-family:'JetBrains Mono', monospace; font-size:11px;
+    color:var(--ink-dimmer); min-width:40px;
+  }
+  .val-layer .name{
+    font-family:'Fraunces', serif; font-size:20px; letter-spacing:-.01em;
+    min-width:280px;
+  }
+  .val-layer .desc{flex:1; font-size:13px; color:var(--ink-dim)}
+  .val-layer .tag{
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    letter-spacing:.15em; text-transform:uppercase;
+    padding:4px 10px; border-radius:2px;
+  }
+  .val-layer.auv{background: rgba(255,107,61,.04); border-left:3px solid rgba(255,107,61,.3)}
+  .val-layer.auv .name{color:var(--auv); opacity:.85}
+  .val-layer.auv .tag{background:rgba(255,107,61,.12); color:var(--auv)}
+  .val-layer.te{background: rgba(0,198,178,.05); border-left:3px solid var(--te)}
+  .val-layer.te .name{color:var(--te)}
+  .val-layer.te .tag{background:rgba(0,198,178,.15); color:var(--te); box-shadow:0 0 12px rgba(0,198,178,.2)}
+
+  .val-conclusion{
+    margin-top:36px; text-align:center; font-family:'Fraunces', serif;
+    font-size:24px; font-style:italic; color:var(--ink-dim); line-height:1.4;
+    letter-spacing:-.01em;
+  }
+  .val-conclusion strong{color:var(--te); font-style:normal; font-weight:600}
+
+  /* ---------- VERDICT ---------- */
+  .verdict-section{
+    padding: 140px 0 180px;
+    background:linear-gradient(180deg, #06080c 0%, #030405 100%);
+    position:relative;
+  }
+  .verdict-head{
+    font-size: clamp(60px, 9vw, 140px);
+    line-height:.92; letter-spacing:-.04em; font-weight:400;
+    max-width:1100px;
+  }
+  .verdict-head em{font-style:italic; color:var(--ink-dim); font-weight:300}
+  .verdict-head .accent-te{color:var(--te)}
+
+  .verdict-grid{
+    display:grid; grid-template-columns: 1fr 1fr 1fr; gap:32px;
+    margin-top:80px;
+  }
+  .v-card{
+    padding:36px; border:1px solid var(--line-bright); border-radius:4px;
+    background:var(--panel); position:relative;
+  }
+  .v-card .ico{
+    width:40px; height:40px; border-radius:2px;
+    background:var(--te); color:var(--bg);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif; font-size:22px; font-weight:600;
+    margin-bottom:24px;
+    box-shadow:0 0 30px rgba(0,198,178,.3);
+  }
+  .v-card h4{font-size:22px; letter-spacing:-.01em; margin-bottom:12px}
+  .v-card p{font-size:14px; color:var(--ink-dim); line-height:1.6}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    padding:48px 0; border-top:1px solid var(--line);
+    display:flex; justify-content:space-between; align-items:center;
+    font-family:'JetBrains Mono', monospace; font-size:11px;
+    color:var(--ink-dimmer); letter-spacing:.1em;
+  }
+  footer .left{max-width:520px}
+  footer a{color:var(--ink-dim); text-decoration:underline; text-decoration-color:var(--line-bright)}
+  footer a:hover{color:var(--te); text-decoration-color:var(--te)}
+
+  /* --- Responsive --- */
+  @media (max-width: 960px){
+    .wrap{padding:0 20px}
+    .pos-grid{grid-template-columns: 1fr}
+    .pos-col.auv{border-right:0; border-bottom:1px solid var(--line-bright)}
+    .arch-grid{grid-template-columns: 1fr}
+    .matrix{grid-template-columns: 1.5fr 1fr 1fr; font-size:12px}
+    .m-cell{padding:14px 16px}
+    .m-head{padding:14px 16px}
+    .scen-panel.active{grid-template-columns:1fr}
+    .verdict-grid{grid-template-columns:1fr}
+    .race{grid-template-columns:1fr; gap:20px}
+    .race-y{flex-direction:row; flex-wrap:wrap; justify-content:flex-start; gap:0}
+    .race-y .cat{text-align:left; display:none}
+    .hero-bottom{grid-template-columns: 1fr 1fr}
+    .val-layer{flex-wrap:wrap}
+    .val-layer .name{min-width:100%}
+    .rail{display:none}
+  }
+
+  /* Scroll-snap-like section markers */
+  .section-tick{
+    position:absolute; top:40px; left:32px;
+    font-family:'JetBrains Mono', monospace; font-size:10px;
+    color:var(--ink-dimmer); letter-spacing:.2em;
+  }
+
+  /* Misc selection */
+  ::selection{background:var(--te); color:var(--bg)}
+</style>
+</head>
+<body>
+
+<nav class="rail" id="rail">
+  <a href="#top" class="active" title="Top"></a>
+  <a href="#positioning" title="Positioning"></a>
+  <a href="#architecture" title="Architecture"></a>
+  <a href="#capabilities" title="Capabilities"></a>
+  <a href="#performance" title="Performance"></a>
+  <a href="#scenarios" title="Scenarios"></a>
+  <a href="#value" title="Value"></a>
+  <a href="#verdict" title="Verdict"></a>
+</nav>
+
+<!-- ================== HERO ================== -->
+<header class="hero" id="top">
+  <div class="hero-grid"></div>
+  <div class="hero-orb a"></div>
+  <div class="hero-orb b"></div>
+
+  <div class="wrap hero-top">
+    <span><span class="dot"></span>A Comparative Analysis · Enterprise Network Intelligence</span>
+    <span class="mono">v · 01 / 2026</span>
+  </div>
+
+  <div class="wrap hero-main">
+    <div class="eyebrow">ThousandEyes × Auvik</div>
+    <h1 class="headline">
+      <span class="l1">One tool maps</span>
+      <span class="l2">the room you're <em>standing</em> in.</span>
+      <span class="l3">The other maps <span class="accent-te">the internet.</span></span>
+    </h1>
+    <p class="hero-sub">
+      Both platforms call themselves "network monitoring." The label is misleading. <strong>Auvik</strong> watches the devices you own. <strong>ThousandEyes</strong> watches every path between your users and the applications they actually use — including the ninety percent of the network you don't own, can't see, and can't call for support.
+    </p>
+  </div>
+
+  <div class="wrap hero-bottom">
+    <div class="stat">
+      <div class="n">271<span class="unit">cities</span></div>
+      <div class="lbl">ThousandEyes Cloud Agents</div>
+    </div>
+    <div class="stat">
+      <div class="n">0<span class="unit">global</span></div>
+      <div class="lbl">Auvik external vantage points</div>
+    </div>
+    <div class="stat">
+      <div class="n">BGP<span class="unit">native</span></div>
+      <div class="lbl">Internet routing visibility</div>
+    </div>
+    <div class="stat">
+      <div class="n">SaaS<span class="unit">aware</span></div>
+      <div class="lbl">Third-party app monitoring</div>
+    </div>
+  </div>
+</header>
+
+<!-- ================== 01 · POSITIONING ================== -->
+<section id="positioning" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-num">§ 01 — The Positioning Divide</div>
+    <h2 class="sec-title">Different categories, <em>mistaken</em> for competitors.</h2>
+    <p class="sec-lede">
+      Gartner classifies these tools in separate markets for a reason. Auvik lives in the Network Monitoring / MSP tooling space. ThousandEyes leads the Digital Experience Monitoring category. Understanding that distinction is the entire argument.
+    </p>
+  </div>
+
+  <div class="pos-grid reveal">
+    <div class="pos-col auv">
+      <div class="pos-head">
+        <div class="pos-brand">Auvik</div>
+        <div class="pos-tag">Network Mgmt · MSP</div>
+      </div>
+      <div class="pos-quote">"Real-time mapping, device monitoring, and config backup for networks <em>you administer</em>."</div>
+      <ul class="pos-list">
+        <li><span class="k">Audience</span><span class="v">MSPs and internal IT managing owned LAN / branch infrastructure.</span></li>
+        <li><span class="k">Scope</span><span class="v">SNMP / syslog / config. Stops at the WAN demarc.</span></li>
+        <li><span class="k">Pricing</span><span class="v">Per billable device (routers, switches, firewalls, WLCs).</span></li>
+        <li><span class="k">Sweet Spot</span><span class="v">Small-to-mid networks with predictable device counts.</span></li>
+        <li><span class="k">Blind Spot</span><span class="v">The internet itself — ISPs, SaaS, CDNs, BGP, cloud regions.</span></li>
+      </ul>
+    </div>
+
+    <div class="pos-col te">
+      <div class="pos-head">
+        <div class="pos-brand">ThousandEyes</div>
+        <div class="pos-tag">DEM · Internet Intelligence</div>
+      </div>
+      <div class="pos-quote">"End-to-end visibility across <em>every</em> network your business depends on — owned or not."</div>
+      <ul class="pos-list">
+        <li><span class="k">Audience</span><span class="v">Enterprises, carriers, SaaS providers, financial institutions, government.</span></li>
+        <li><span class="k">Scope</span><span class="v">User → LAN → WAN → ISP → Internet core → Cloud → App.</span></li>
+        <li><span class="k">Pricing</span><span class="v">Unit-based; value scales with enterprise footprint.</span></li>
+        <li><span class="k">Sweet Spot</span><span class="v">Hybrid, SaaS-heavy, globally distributed environments.</span></li>
+        <li><span class="k">Blind Spot</span><span class="v">Intentionally thin on SNMP device administration (not its purpose).</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ================== 02 · ARCHITECTURE ================== -->
+<section id="architecture" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-num">§ 02 — Architectural DNA</div>
+    <h2 class="sec-title">Polling boxes <em>versus</em> measuring the internet.</h2>
+    <p class="sec-lede">
+      Auvik's architecture is a hub that SNMP-polls the devices inside your perimeter. ThousandEyes' architecture is a distributed measurement mesh — thousands of agents across hundreds of cities continuously probing paths, routes, and applications from the outside in.
+    </p>
+  </div>
+
+  <div class="arch-grid reveal">
+
+    <!-- Auvik visualization -->
+    <div class="arch-card">
+      <div class="arch-label">Approach · Perimeter-Bound</div>
+      <h3 class="arch-title" style="color:var(--auv); opacity:.85">Auvik — Inside Your Walls</h3>
+      <svg class="arch-svg" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+        <!-- perimeter box -->
+        <rect x="60" y="40" width="380" height="220" rx="4"
+              fill="none" stroke="#3a2a22" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="72" y="32" font-family="JetBrains Mono" font-size="9" fill="#6b3222" letter-spacing="1">YOUR PERIMETER</text>
+        <!-- collector in center -->
+        <circle cx="250" cy="150" r="28" fill="none" stroke="#ff6b3d" stroke-width="1.2"/>
+        <circle cx="250" cy="150" r="18" fill="#ff6b3d" opacity=".15"/>
+        <text x="250" y="155" text-anchor="middle" font-family="JetBrains Mono" font-size="9" fill="#ff6b3d">COLLECTOR</text>
+        <!-- devices -->
+        <g stroke="#ff6b3d" stroke-opacity=".35" stroke-width=".8">
+          <line x1="250" y1="150" x2="120" y2="90"/>
+          <line x1="250" y1="150" x2="120" y2="210"/>
+          <line x1="250" y1="150" x2="380" y2="90"/>
+          <line x1="250" y1="150" x2="380" y2="210"/>
+          <line x1="250" y1="150" x2="250" y2="80"/>
+          <line x1="250" y1="150" x2="250" y2="230"/>
+        </g>
+        <g font-family="JetBrains Mono" font-size="8" fill="#9b9a93">
+          <rect x="100" y="78" width="40" height="24" rx="2" fill="#1a110c" stroke="#ff6b3d" stroke-opacity=".5"/>
+          <text x="120" y="93" text-anchor="middle">switch</text>
+          <rect x="100" y="198" width="40" height="24" rx="2" fill="#1a110c" stroke="#ff6b3d" stroke-opacity=".5"/>
+          <text x="120" y="213" text-anchor="middle">AP</text>
+          <rect x="360" y="78" width="40" height="24" rx="2" fill="#1a110c" stroke="#ff6b3d" stroke-opacity=".5"/>
+          <text x="380" y="93" text-anchor="middle">router</text>
+          <rect x="360" y="198" width="40" height="24" rx="2" fill="#1a110c" stroke="#ff6b3d" stroke-opacity=".5"/>
+          <text x="380" y="213" text-anchor="middle">firewall</text>
+          <rect x="230" y="68" width="40" height="24" rx="2" fill="#1a110c" stroke="#ff6b3d" stroke-opacity=".5"/>
+          <text x="250" y="83" text-anchor="middle">server</text>
+          <rect x="230" y="218" width="40" height="24" rx="2" fill="#1a110c" stroke="#ff6b3d" stroke-opacity=".5"/>
+          <text x="250" y="233" text-anchor="middle">WLC</text>
+        </g>
+        <!-- internet outside -->
+        <g opacity=".3">
+          <text x="30" y="280" font-family="JetBrains Mono" font-size="9" fill="#575651" letter-spacing="1.5">— THE INTERNET BEYOND THIS BOX IS INVISIBLE —</text>
+        </g>
+      </svg>
+      <p class="arch-caption"><strong>A single collector appliance polls SNMP inside the LAN.</strong> Excellent for device inventory, config drift, and switchport diagnostics. Visibility ends at the edge router — everything past it is a black box.</p>
+    </div>
+
+    <!-- ThousandEyes visualization -->
+    <div class="arch-card te">
+      <div class="arch-label" style="color:var(--te)">Approach · Globally Distributed</div>
+      <h3 class="arch-title">ThousandEyes — The Internet Is the Network</h3>
+      <svg class="arch-svg" viewBox="0 0 500 300" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <radialGradient id="globe" cx="50%" cy="50%">
+            <stop offset="0%" stop-color="#00c6b2" stop-opacity=".15"/>
+            <stop offset="70%" stop-color="#00c6b2" stop-opacity=".02"/>
+            <stop offset="100%" stop-color="#00c6b2" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+        <!-- globe base -->
+        <circle cx="250" cy="150" r="110" fill="url(#globe)"/>
+        <ellipse cx="250" cy="150" rx="110" ry="110" fill="none" stroke="#1a2e2b" stroke-width="1"/>
+        <ellipse cx="250" cy="150" rx="110" ry="40" fill="none" stroke="#1a2e2b" stroke-width="1"/>
+        <ellipse cx="250" cy="150" rx="110" ry="70" fill="none" stroke="#1a2e2b" stroke-width=".6"/>
+        <line x1="250" y1="40" x2="250" y2="260" stroke="#1a2e2b" stroke-width="1"/>
+        <line x1="140" y1="150" x2="360" y2="150" stroke="#1a2e2b" stroke-width="1"/>
+        <!-- target (your app) center -->
+        <circle cx="250" cy="150" r="7" fill="#00c6b2"/>
+        <circle cx="250" cy="150" r="12" fill="none" stroke="#00c6b2" stroke-width="1" opacity=".6"/>
+        <text x="250" y="175" text-anchor="middle" font-family="JetBrains Mono" font-size="8" fill="#00c6b2" letter-spacing="1">YOUR APP</text>
+
+        <!-- vantage points around globe with pings -->
+        <g fill="#00c6b2">
+          <!-- vp list: x,y pairs around roughly geographic positions -->
+          <circle cx="165" cy="110" r="3"/>
+          <circle cx="200" cy="85" r="3"/>
+          <circle cx="290" cy="85" r="3"/>
+          <circle cx="330" cy="105" r="3"/>
+          <circle cx="355" cy="155" r="3"/>
+          <circle cx="320" cy="210" r="3"/>
+          <circle cx="250" cy="240" r="3"/>
+          <circle cx="170" cy="205" r="3"/>
+          <circle cx="145" cy="165" r="3"/>
+          <!-- pings -->
+          <circle class="vp-ping d1" cx="165" cy="110" r="3" fill="none" stroke="#00c6b2" stroke-width="1"/>
+          <circle class="vp-ping d2" cx="200" cy="85" r="3" fill="none" stroke="#00c6b2" stroke-width="1"/>
+          <circle class="vp-ping d3" cx="290" cy="85" r="3" fill="none" stroke="#00c6b2" stroke-width="1"/>
+          <circle class="vp-ping d4" cx="330" cy="105" r="3" fill="none" stroke="#00c6b2" stroke-width="1"/>
+          <circle class="vp-ping d5" cx="355" cy="155" r="3" fill="none" stroke="#00c6b2" stroke-width="1"/>
+          <circle class="vp-ping d6" cx="320" cy="210" r="3" fill="none" stroke="#00c6b2" stroke-width="1"/>
+          <circle class="vp-ping d7" cx="170" cy="205" r="3" fill="none" stroke="#00c6b2" stroke-width="1"/>
+          <circle class="vp-ping d8" cx="145" cy="165" r="3" fill="none" stroke="#00c6b2" stroke-width="1"/>
+        </g>
+        <!-- probe paths -->
+        <g stroke="#00c6b2" stroke-width=".7" fill="none" opacity=".55" class="path-dash">
+          <path d="M165 110 Q 200 140 250 150"/>
+          <path d="M290 85 Q 270 120 250 150"/>
+          <path d="M330 105 Q 300 130 250 150"/>
+          <path d="M355 155 Q 300 150 250 150"/>
+          <path d="M320 210 Q 290 175 250 150"/>
+          <path d="M170 205 Q 210 175 250 150"/>
+          <path d="M145 165 Q 190 155 250 150"/>
+        </g>
+        <!-- labels -->
+        <text x="14" y="22" font-family="JetBrains Mono" font-size="9" fill="#00c6b2" letter-spacing="1.5">GLOBAL VANTAGE POINTS · 271 CITIES</text>
+        <text x="14" y="290" font-family="JetBrains Mono" font-size="8" fill="#575651" letter-spacing="1">CLOUD · ENTERPRISE · ENDPOINT · DEVICE AGENTS</text>
+      </svg>
+      <p class="arch-caption"><strong>Four agent types measure continuously from everywhere at once.</strong> Cloud Agents in 271 cities. Enterprise Agents inside your network. Endpoint Agents on user laptops. Device Agents on CPE. Every hop, every path, every ISP — recorded and correlated.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================== 03 · CAPABILITY MATRIX ================== -->
+<section id="capabilities" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-num">§ 03 — The Capability Matrix</div>
+    <h2 class="sec-title">Where the feature lists <em>overlap</em>, and where they don't.</h2>
+    <p class="sec-lede">
+      Filter by domain. The further you push past on-premises device monitoring, the more starkly the two platforms diverge. This isn't a marketing comparison — each row maps to features publicly documented by the vendor.
+    </p>
+  </div>
+
+  <div class="matrix-controls reveal">
+    <button class="mc-btn active" data-filter="all">All Capabilities</button>
+    <button class="mc-btn" data-filter="device">Device &amp; LAN</button>
+    <button class="mc-btn" data-filter="wan">WAN &amp; Internet</button>
+    <button class="mc-btn" data-filter="app">Application &amp; UX</button>
+    <button class="mc-btn" data-filter="intel">Internet Intelligence</button>
+  </div>
+
+  <div class="matrix reveal" id="matrix">
+    <div class="m-head">Capability</div>
+    <div class="m-head te">ThousandEyes</div>
+    <div class="m-head auv">Auvik</div>
+
+    <!-- DEVICE -->
+    <div class="m-row" data-cat="device">
+      <div class="m-cell m-cap">Automated Network Discovery<span class="sub">Identify and inventory devices on a LAN</span></div>
+      <div class="m-cell m-te"><span class="chip partial">Limited</span><span class="m-detail">Enterprise Agents can discover &amp; topologically map internal network devices via SNMP.</span></div>
+      <div class="m-cell m-auv"><span class="chip full">Core Strength</span><span class="m-detail">Auto-discovery with real-time topology maps is the platform's headline feature.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="device">
+      <div class="m-cell m-cap">Config Backup &amp; Change Tracking<span class="sub">Snapshot switch/router configurations</span></div>
+      <div class="m-cell m-te"><span class="chip none">Not Core</span><span class="m-detail">Not the platform's purpose. Expect to pair with a dedicated NCM tool.</span></div>
+      <div class="m-cell m-auv"><span class="chip full">Yes</span><span class="m-detail">Automated config backup and restore across supported devices.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="device">
+      <div class="m-cell m-cap">SNMP Polling &amp; Device Metrics<span class="sub">CPU, memory, interface counters</span></div>
+      <div class="m-cell m-te"><span class="chip full">Via Enterprise Agent</span><span class="m-detail">SNMP-based monitoring of internal devices is supported.</span></div>
+      <div class="m-cell m-auv"><span class="chip full">Yes</span><span class="m-detail">Availability, bandwidth, packet loss, CPU, interface health.</span></div>
+    </div>
+
+    <!-- WAN / INTERNET -->
+    <div class="m-row" data-cat="wan">
+      <div class="m-cell m-cap">Hop-by-Hop Internet Path Visualization<span class="sub">Every router between user and app</span></div>
+      <div class="m-cell m-te"><span class="chip native">Signature Feature</span><span class="m-detail">Topologically correlated multi-agent path view across ISP, internet, cloud.</span></div>
+      <div class="m-cell m-auv"><span class="chip none">No</span><span class="m-detail">Path visibility stops at the edge of managed devices.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="wan">
+      <div class="m-cell m-cap">ISP &amp; Carrier Performance Monitoring<span class="sub">Prove whether "the internet" is at fault</span></div>
+      <div class="m-cell m-te"><span class="chip full">Yes — Outside-In</span><span class="m-detail">Cloud Agents on Tier 1/2/3 ISPs provide evidence-grade carrier comparison.</span></div>
+      <div class="m-cell m-auv"><span class="chip none">No</span><span class="m-detail">Cannot independently measure carrier performance outside the edge.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="wan">
+      <div class="m-cell m-cap">SD-WAN &amp; Branch Experience Correlation<span class="sub">User experience across underlays</span></div>
+      <div class="m-cell m-te"><span class="chip full">Yes</span><span class="m-detail">Deep SD-WAN integration; correlates app experience with underlay health.</span></div>
+      <div class="m-cell m-auv"><span class="chip partial">Device-level only</span><span class="m-detail">Monitors SD-WAN devices but not the tunneled experience across the internet.</span></div>
+    </div>
+
+    <!-- APP / UX -->
+    <div class="m-row" data-cat="app">
+      <div class="m-cell m-cap">Synthetic Web &amp; API Transaction Testing<span class="sub">Multi-step transactions, page load waterfalls</span></div>
+      <div class="m-cell m-te"><span class="chip native">First-class</span><span class="m-detail">HTTP, page load, transaction, multi-step API, web component waterfalls.</span></div>
+      <div class="m-cell m-auv"><span class="chip none">No</span><span class="m-detail">Not a synthetic-monitoring product.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="app">
+      <div class="m-cell m-cap">SaaS Application Experience (M365, Salesforce, Zoom)<span class="sub">Measure apps you don't own</span></div>
+      <div class="m-cell m-te"><span class="chip full">Yes</span><span class="m-detail">Out-of-the-box SaaS templates; tracked by Fortune 500 for third-party apps.</span></div>
+      <div class="m-cell m-auv"><span class="chip none">No</span><span class="m-detail">SaaS endpoints are outside Auvik's field of view.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="app">
+      <div class="m-cell m-cap">End-User Digital Experience (Endpoint Agent)<span class="sub">What the employee actually sees</span></div>
+      <div class="m-cell m-te"><span class="chip full">Yes</span><span class="m-detail">Endpoint Agent captures Wi-Fi, ISP, VPN, SaaS performance from the user's device.</span></div>
+      <div class="m-cell m-auv"><span class="chip none">No</span><span class="m-detail">No endpoint experience agent.</span></div>
+    </div>
+
+    <!-- INTELLIGENCE -->
+    <div class="m-row" data-cat="intel">
+      <div class="m-cell m-cap">BGP Route Monitoring<span class="sub">Detect internet-wide routing issues</span></div>
+      <div class="m-cell m-te"><span class="chip native">Dozens of BGP collectors</span><span class="m-detail">Real-time AS-path visualization, RPKI validation, stuck-route detection.</span></div>
+      <div class="m-cell m-auv"><span class="chip none">No</span><span class="m-detail">No BGP visibility — conceptually outside the product.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="intel">
+      <div class="m-cell m-cap">DNS Service Monitoring<span class="sub">Authoritative and recursive DNS health</span></div>
+      <div class="m-cell m-te"><span class="chip full">Yes</span><span class="m-detail">Validate DNS records, measure resolution, detect hijacks/misconfigurations.</span></div>
+      <div class="m-cell m-auv"><span class="chip partial">Very limited</span><span class="m-detail">Reachability checks only; no authoritative DNS analysis.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="intel">
+      <div class="m-cell m-cap">Global Internet Outage Detection<span class="sub">Know when AWS, a CDN, or a carrier breaks</span></div>
+      <div class="m-cell m-te"><span class="chip native">AI-powered</span><span class="m-detail">Collective intelligence from billions of daily measurements; global outage map.</span></div>
+      <div class="m-cell m-auv"><span class="chip none">No</span><span class="m-detail">Can observe symptoms on owned devices; no macro view.</span></div>
+    </div>
+
+    <div class="m-row" data-cat="intel">
+      <div class="m-cell m-cap">Cloud Provider Backbone Visibility<span class="sub">AWS / Azure / GCP internal paths</span></div>
+      <div class="m-cell m-te"><span class="chip full">Yes</span><span class="m-detail">Cloud Agents in major provider regions; VPC/VNET Enterprise Agents.</span></div>
+      <div class="m-cell m-auv"><span class="chip none">No</span><span class="m-detail">Cloud performance is not part of the visibility model.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== 04 · BAR RACE ================== -->
+<section id="performance" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-num">§ 04 — Capability Coverage, Visualized</div>
+    <h2 class="sec-title">Coverage across <em>the five domains</em> of modern monitoring.</h2>
+    <p class="sec-lede">
+      A synthesized view of capability breadth. Both platforms are competent at device monitoring. Only one continues past the edge — and that's the territory where modern application experience actually lives.
+    </p>
+  </div>
+
+  <div class="race reveal" id="race">
+    <div class="race-y">
+      <div class="cat">Device &amp;<br/>LAN<span class="sub">SNMP · Topology</span></div>
+      <div class="cat">WAN &amp;<br/>Internet Paths<span class="sub">Hop-by-hop · ISPs</span></div>
+      <div class="cat">Application<br/>&amp; SaaS<span class="sub">Synthetic · DEX</span></div>
+      <div class="cat">Internet<br/>Intelligence<span class="sub">BGP · DNS · Outages</span></div>
+      <div class="cat">Global<br/>Distribution<span class="sub">Vantage points</span></div>
+    </div>
+    <div class="race-bars">
+      <div class="bar-group">
+        <div class="bar te" style="width:86%"><span class="lbl">ThousandEyes</span><span class="val">86</span></div>
+        <div class="bar auv" style="width:96%"><span class="lbl">Auvik</span><span class="val">96</span></div>
+      </div>
+      <div class="bar-group">
+        <div class="bar te" style="width:98%"><span class="lbl">ThousandEyes</span><span class="val">98</span></div>
+        <div class="bar auv" style="width:22%"><span class="lbl">Auvik</span><span class="val">22</span></div>
+      </div>
+      <div class="bar-group">
+        <div class="bar te" style="width:96%"><span class="lbl">ThousandEyes</span><span class="val">96</span></div>
+        <div class="bar auv" style="width:8%"><span class="lbl">Auvik</span><span class="val">8</span></div>
+      </div>
+      <div class="bar-group">
+        <div class="bar te" style="width:99%"><span class="lbl">ThousandEyes</span><span class="val">99</span></div>
+        <div class="bar auv" style="width:6%"><span class="lbl">Auvik</span><span class="val">6</span></div>
+      </div>
+      <div class="bar-group">
+        <div class="bar te" style="width:97%"><span class="lbl">ThousandEyes</span><span class="val">97</span></div>
+        <div class="bar auv" style="width:18%"><span class="lbl">Auvik</span><span class="val">18</span></div>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top:24px; font-family:'JetBrains Mono', monospace; font-size:11px; color:var(--ink-dimmer); letter-spacing:.1em;">
+    // Scores are directional, synthesized from vendor documentation and Gartner Peer Insights, G2, and PeerSpot reviews. Auvik scores higher on pure device-centric LAN work; ThousandEyes dominates everything else.
+  </p>
+</section>
+
+<!-- ================== 05 · SCENARIOS ================== -->
+<section id="scenarios" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-num">§ 05 — The Same Incident, Two Tools</div>
+    <h2 class="sec-title">Four real-world scenarios. <em>Watch what each tool can say.</em></h2>
+    <p class="sec-lede">
+      Theory is cheap. Here are four incidents that occur routinely in enterprise IT. Each tab shows what the tool can actually prove about the incident — and, just as importantly, what it can't.
+    </p>
+  </div>
+
+  <div class="scen-tabs reveal" id="scenTabs">
+    <button class="scen-tab active" data-scen="0"><span class="num">01</span>Microsoft 365 is slow</button>
+    <button class="scen-tab" data-scen="1"><span class="num">02</span>Users say VPN is "broken"</button>
+    <button class="scen-tab" data-scen="2"><span class="num">03</span>SaaS outage at 2 a.m.</button>
+    <button class="scen-tab" data-scen="3"><span class="num">04</span>Branch site down</button>
+  </div>
+
+  <div class="scen-panel active" data-panel="0">
+    <div class="scen-scenario">
+      <div class="label">Scenario · 08:42 EST</div>
+      <h3>"Teams calls keep dropping across the Atlanta office."</h3>
+      <p>IT receives a wave of tickets. Calls are choppy, video freezes, screen shares stall. The on-prem switches are green. The WAN router reports no errors. So is it Microsoft? Is it the ISP? Is it Wi-Fi? Is it the user's laptop?</p>
+      <div class="scen-story">The pressure: a VP is about to join a board presentation. Someone needs an answer in minutes, not hours.</div>
+    </div>
+    <div class="scen-col auv">
+      <div class="name">Auvik says</div>
+      <ul>
+        <li>Switch and router health look normal.</li>
+        <li>Bandwidth utilization is within baseline.</li>
+        <li>No device is alerting.</li>
+        <li>That's… all.</li>
+      </ul>
+      <div class="verdict"><strong>Verdict:</strong> Confirmed the LAN is fine. Did not reveal where the problem actually is.</div>
+    </div>
+    <div class="scen-col te">
+      <div class="name">ThousandEyes says</div>
+      <ul>
+        <li>Endpoint Agent shows 6% packet loss on the ISP's second hop.</li>
+        <li>Path visualization isolates loss to a single upstream peer.</li>
+        <li>Teams service itself is healthy globally.</li>
+        <li>Evidence is exportable to the ISP for escalation.</li>
+      </ul>
+      <div class="verdict"><strong>Verdict:</strong> Root cause in minutes, with evidence your carrier cannot argue with.</div>
+    </div>
+  </div>
+
+  <div class="scen-panel" data-panel="1">
+    <div class="scen-scenario">
+      <div class="label">Scenario · 10:15 EST</div>
+      <h3>"Remote workers can't reach internal apps through the VPN."</h3>
+      <p>Help desk tickets are piling up from three different regions. The VPN concentrator shows active tunnels. Some users reconnect and it works; others stay broken. Internal apps respond fine when tested from HQ.</p>
+      <div class="scen-story">Is this an ISP issue for some users? A routing asymmetry? A problem at the concentrator's upstream? A DNS quirk?</div>
+    </div>
+    <div class="scen-col auv">
+      <div class="name">Auvik says</div>
+      <ul>
+        <li>VPN concentrator device is up.</li>
+        <li>Session counts look nominal.</li>
+        <li>No visibility into remote users' networks.</li>
+        <li>No visibility into the path between user and concentrator.</li>
+      </ul>
+      <div class="verdict"><strong>Verdict:</strong> Blind to everything outside your building.</div>
+    </div>
+    <div class="scen-col te">
+      <div class="name">ThousandEyes says</div>
+      <ul>
+        <li>Endpoint Agents from affected users show MTU fragmentation on one ISP.</li>
+        <li>Cloud Agents confirm the concentrator is globally reachable.</li>
+        <li>Path viz exposes an asymmetric route via a congested transit provider.</li>
+        <li>Correlates VPN issues to a single ISP — not to your infrastructure.</li>
+      </ul>
+      <div class="verdict"><strong>Verdict:</strong> You know exactly who to call — and it isn't you.</div>
+    </div>
+  </div>
+
+  <div class="scen-panel" data-panel="2">
+    <div class="scen-scenario">
+      <div class="label">Scenario · 02:07 EST</div>
+      <h3>"A critical SaaS vendor has a regional outage — but won't admit it."</h3>
+      <p>Your order-management SaaS is sluggish. The vendor's status page is green. Half your regions report failures; half don't. The CIO wants to know whether to fail over to a secondary system — a decision that costs millions either way.</p>
+      <div class="scen-story">Without independent evidence, you're taking the vendor's word for it at the worst possible moment.</div>
+    </div>
+    <div class="scen-col auv">
+      <div class="name">Auvik says</div>
+      <ul>
+        <li>Your on-prem network is healthy.</li>
+        <li>No SaaS-side visibility.</li>
+        <li>No BGP or DNS insight.</li>
+        <li>You're dependent on the vendor's self-reporting.</li>
+      </ul>
+      <div class="verdict"><strong>Verdict:</strong> Cannot participate in the decision at all.</div>
+    </div>
+    <div class="scen-col te">
+      <div class="name">ThousandEyes says</div>
+      <ul>
+        <li>Cloud Agents in 12 regions confirm degradation in 4 specific ones.</li>
+        <li>BGP data shows a stuck route affecting the vendor's AS.</li>
+        <li>Internet Outages map correlates the pattern to a known transit failure.</li>
+        <li>Failover decision is now evidence-based, not a gamble.</li>
+      </ul>
+      <div class="verdict"><strong>Verdict:</strong> You saw it before the vendor's status page did — and you can prove it.</div>
+    </div>
+  </div>
+
+  <div class="scen-panel" data-panel="3">
+    <div class="scen-scenario">
+      <div class="label">Scenario · 14:30 EST</div>
+      <h3>"A small branch office just lost connectivity."</h3>
+      <p>A 15-person regional sales office drops off the network. The branch router has gone dark. Someone needs to know: is the router dead? Is the circuit down? Is it the ISP? Is there a physical issue in the closet?</p>
+      <div class="scen-story">This is the bread-and-butter scenario Auvik was designed for — and it shows.</div>
+    </div>
+    <div class="scen-col auv" style="border-color:rgba(245,184,65,.4)">
+      <div class="name" style="color:var(--amber)">Auvik says</div>
+      <ul style="color:var(--ink)">
+        <li>Router and switch at the site are unreachable.</li>
+        <li>Last-seen config snapshot is available for restore.</li>
+        <li>Historical device health points to likely hardware cause.</li>
+        <li>You have documentation to hand to the tech on-site.</li>
+      </ul>
+      <div class="verdict"><strong style="color:var(--amber)">Verdict:</strong> A legitimately strong scenario for Auvik — remote device diagnostics are its core competence.</div>
+    </div>
+    <div class="scen-col te">
+      <div class="name">ThousandEyes says</div>
+      <ul>
+        <li>Cloud Agents confirm the branch ISP circuit is down externally.</li>
+        <li>BGP shows the branch's prefix is no longer being announced.</li>
+        <li>You know the problem is upstream, not your equipment.</li>
+        <li>Evidence is ready to hand to the ISP on the first call.</li>
+      </ul>
+      <div class="verdict"><strong>Verdict:</strong> Still wins on root-cause confirmation, but this is Auvik's strongest showing.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== 06 · VALUE STACK ================== -->
+<section id="value" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-num">§ 06 — The Value Stack</div>
+    <h2 class="sec-title">What each tool <em>actually</em> does for the business.</h2>
+    <p class="sec-lede">
+      Every tool answers a question. The strategic question is: which question does your business urgently need answered? For an MSP managing dozens of small networks, "is the device healthy?" matters. For a global enterprise, it's table stakes — the real question is "why is my customer's experience degraded?"
+    </p>
+  </div>
+
+  <div class="val-frame reveal">
+    <div class="val-stack">
+      <div class="val-layer auv">
+        <div class="n">L1</div>
+        <div class="name">Is the device up?</div>
+        <div class="desc">Interface status, reachability, config drift. Answered by SNMP polling.</div>
+        <div class="tag">Auvik</div>
+      </div>
+      <div class="val-layer auv">
+        <div class="n">L2</div>
+        <div class="name">Is the LAN healthy?</div>
+        <div class="desc">Topology maps, bandwidth baselines, error counters on owned links.</div>
+        <div class="tag">Auvik</div>
+      </div>
+      <div class="val-layer te">
+        <div class="n">L3</div>
+        <div class="name">Is the path to the app clean?</div>
+        <div class="desc">Hop-by-hop visualization through ISPs, peering points, CDNs, cloud backbones.</div>
+        <div class="tag">ThousandEyes</div>
+      </div>
+      <div class="val-layer te">
+        <div class="n">L4</div>
+        <div class="name">Is the app itself performing?</div>
+        <div class="desc">Synthetic transactions, page-load waterfalls, multi-step API tests against real endpoints.</div>
+        <div class="tag">ThousandEyes</div>
+      </div>
+      <div class="val-layer te">
+        <div class="n">L5</div>
+        <div class="name">Is the internet routing correctly?</div>
+        <div class="desc">BGP monitoring, RPKI validation, DNS integrity, global outage detection.</div>
+        <div class="tag">ThousandEyes</div>
+      </div>
+      <div class="val-layer te">
+        <div class="n">L6</div>
+        <div class="name">What is the user experiencing <em>right now</em>?</div>
+        <div class="desc">Endpoint Agent on user devices measures Wi-Fi, VPN, ISP, SaaS from the human's seat.</div>
+        <div class="tag">ThousandEyes</div>
+      </div>
+    </div>
+    <div class="val-conclusion">
+      Auvik answers questions <em>1 and 2</em>. <strong>ThousandEyes answers 3 through 6</strong> — where digital experience actually lives.
+    </div>
+  </div>
+</section>
+
+<!-- ================== 07 · VERDICT ================== -->
+<section id="verdict" class="verdict-section">
+  <div class="wrap">
+    <div class="sec-num reveal">§ 07 — The Verdict</div>
+    <h2 class="verdict-head reveal">
+      Auvik is a <em>fine</em> tool<br/>for a <em>narrow</em> job.<br/>
+      <span class="accent-te">ThousandEyes is the job</span><br/>
+      <em>most enterprises now have.</em>
+    </h2>
+
+    <div class="verdict-grid reveal">
+      <div class="v-card">
+        <div class="ico">◎</div>
+        <h4>Scope Mismatch</h4>
+        <p>The modern application stack is 90% networks you don't own. Auvik watches the 10% you do. ThousandEyes watches the 100% your users actually experience — the only scope that maps to how business value is delivered today.</p>
+      </div>
+      <div class="v-card">
+        <div class="ico">∞</div>
+        <h4>Evidence, Not Assumptions</h4>
+        <p>When the finger-pointing starts between you, the ISP, and the SaaS vendor, Auvik can prove your devices are healthy. ThousandEyes can prove which of the other three is lying — with data they cannot refute.</p>
+      </div>
+      <div class="v-card">
+        <div class="ico">↗</div>
+        <h4>Strategic Fit</h4>
+        <p>Auvik was built for MSPs billing per device. ThousandEyes was built for organizations whose revenue, customer trust, and employee productivity depend on digital experiences they don't directly control. Match the tool to the stakes.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:100px; padding-top:48px; border-top:1px solid var(--line); display:grid; grid-template-columns: 1fr 1fr; gap:60px; align-items:start" class="reveal">
+      <div>
+        <div class="sec-num" style="margin-bottom:16px">When Auvik is the right answer</div>
+        <p style="font-size:16px; color:var(--ink-dim); line-height:1.65">
+          An MSP managing dozens of small clients. An internal team with predictable, on-prem infrastructure and a device-centric operations model. A shop that needs config backup, automated discovery, and a dashboard for the NOC more than it needs end-to-end experience visibility. <strong style="color:var(--ink); font-weight:500">Auvik is good at this. Genuinely.</strong>
+        </p>
+      </div>
+      <div>
+        <div class="sec-num" style="margin-bottom:16px">When ThousandEyes is the right answer</div>
+        <p style="font-size:16px; color:var(--ink); line-height:1.65">
+          Any organization where a slow SaaS app, a misrouted BGP prefix, a noisy ISP, or a degraded CDN can cost real money or real customers. Hybrid workforces. Cloud-native architectures. Multi-region footprints. Anyone whose users log in over the public internet to do their jobs — which, in 2026, <strong style="color:var(--te); font-weight:500">is nearly everyone</strong>.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== FOOTER ================== -->
+<footer>
+  <div class="wrap" style="display:flex; justify-content:space-between; width:100%; gap:40px; flex-wrap:wrap;">
+    <div class="left">
+      Prepared as a comparative analysis. Synthesized from vendor documentation (thousandeyes.com, auvik.com), Gartner Peer Insights, G2, PeerSpot, and TrustRadius reviews current as of Q2 2026. Every capability claim is verifiable in the cited vendor's public product documentation.
+    </div>
+    <div>
+      End of document · <span style="color:var(--te)">§ 07 of 07</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveals
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting){
+        e.target.classList.add('in');
+      }
+    });
+  }, {threshold: 0.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Rail navigation highlighting
+  const sections = ['#top','#positioning','#architecture','#capabilities','#performance','#scenarios','#value','#verdict'];
+  const railLinks = document.querySelectorAll('.rail a');
+  const secElements = sections.map(s => document.querySelector(s));
+  function updateRail(){
+    const y = window.scrollY + window.innerHeight * 0.35;
+    let active = 0;
+    secElements.forEach((el, i) => {
+      if (el && el.offsetTop <= y) active = i;
+    });
+    railLinks.forEach(l => l.classList.remove('active'));
+    railLinks[active]?.classList.add('active');
+  }
+  window.addEventListener('scroll', updateRail, {passive:true});
+  updateRail();
+
+  // Matrix filtering
+  const mcBtns = document.querySelectorAll('.mc-btn');
+  const matrix = document.getElementById('matrix');
+  mcBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      mcBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter;
+      matrix.querySelectorAll('.m-row').forEach(row => {
+        const show = filter === 'all' || row.dataset.cat === filter;
+        row.querySelectorAll('.m-cell').forEach(c => {
+          c.style.display = show ? '' : 'none';
+        });
+      });
+    });
+  });
+
+  // Scenario tabs
+  const scenTabs = document.querySelectorAll('.scen-tab');
+  const scenPanels = document.querySelectorAll('.scen-panel');
+  scenTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const i = tab.dataset.scen;
+      scenTabs.forEach(t => t.classList.remove('active'));
+      scenPanels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.scen-panel[data-panel="${i}"]`).classList.add('active');
+    });
+  });
+</script>
+
+</body>
+</html>
