@@ -1,0 +1,1538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cisco Collab + ThousandEyes vs. The Field — Seller Battle Card</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@300;400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    /* Same design system as Meraki battle card — TE orange + brand pairing */
+    --bg:#FAFAF7;
+    --bg-warm:#F2EFE8;
+    --bg-ink:#1A1A1A;
+    --bg-ink-2:#0E0E0E;
+    --ink:#1A1A1A;
+    --ink-soft:#383838;
+    --ink-mute:#6E6E6E;
+    --ink-faint:#A8A8A5;
+    --line:#E0DDD4;
+    --line-strong:#C8C4B8;
+
+    /* Brand — Webex cyan (the partner brand for THIS doc, like Meraki green was for the SD-WAN doc) */
+    --webex:#00BCEB;           /* Webex bright cyan */
+    --webex-bright:#1ED4FF;
+    --webex-deep:#005073;
+
+    /* Brand — ThousandEyes orange */
+    --te:#E95420;
+    --te-bright:#FF6B35;
+    --te-deep:#B23810;
+
+    /* Aliases */
+    --partner:#00BCEB;         /* generic "partner brand" alias = Webex */
+    --partner-deep:#005073;
+
+    /* Competitor accents */
+    --teams:#5B5FC7;           /* MSFT Teams purple */
+    --zoom:#2D8CFF;            /* Zoom blue */
+    --genesys:#FF4F1F;         /* Genesys orange-red — close to TE so handle carefully */
+    --genesys-safe:#A82D0F;    /* darker variant for headings to differentiate */
+    --nice:#0066CC;            /* NICE blue */
+    --five9:#5BB85B;           /* Five9 green */
+    --amzn:#FF9900;            /* Amazon Connect orange */
+    --moss:#2E7D32;
+    --crimson:#8B1F1F;
+    --warn:#C77C00;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Manrope', sans-serif;
+    font-weight:400;
+    line-height:1.5;
+    overflow-x:hidden;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:"";
+    position:fixed;inset:0;pointer-events:none;z-index:1000;
+    opacity:.05;mix-blend-mode:multiply;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.7 0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>");
+  }
+  .serif{font-family:'Instrument Serif', serif}
+  .mono{font-family:'DM Mono', monospace}
+  a{color:inherit}
+  ::selection{background:var(--te); color:white}
+
+  .wrap{max-width:1360px; margin:0 auto; padding:0 32px}
+
+  /* ============ TOP BAR ============ */
+  .topbar{
+    position:sticky; top:0; z-index:100;
+    background:rgba(250,250,247,.92); backdrop-filter: blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .topbar-inner{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 32px; max-width:1360px; margin:0 auto;
+  }
+  .brand{
+    display:flex; align-items:center; gap:14px;
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.15em; text-transform:uppercase;
+  }
+  .brand .logo{
+    width:30px; height:30px; border-radius:50%;
+    background: conic-gradient(from 90deg, var(--webex) 0 50%, var(--te) 50% 100%);
+    display:flex; align-items:center; justify-content:center;
+    position:relative;
+    box-shadow: 0 0 0 1px rgba(26,26,26,.08);
+  }
+  .brand .logo::before{
+    content:""; position:absolute; inset:5px; border-radius:50%;
+    background:var(--bg);
+  }
+  .brand .logo::after{
+    content:""; position:absolute; inset:10px; border-radius:50%;
+    background: conic-gradient(from 90deg, var(--webex) 0 50%, var(--te) 50% 100%);
+  }
+  .top-nav{display:flex; gap:28px; font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase}
+  .top-nav a{color:var(--ink-mute); text-decoration:none; transition: color .2s}
+  .top-nav a:hover{color:var(--te)}
+  .top-stamp{
+    font-family:'DM Mono', monospace; font-size:10px;
+    color:var(--ink-faint); letter-spacing:.15em;
+  }
+
+  /* ============ HERO ============ */
+  .hero{
+    padding:90px 0 110px;
+    background:
+      radial-gradient(ellipse at 88% 18%, rgba(233,84,32,.18), transparent 55%),
+      radial-gradient(ellipse at 12% 88%, rgba(0,188,235,.16), transparent 55%),
+      var(--bg);
+    position:relative; overflow:hidden;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-grid-bg{
+    position:absolute; inset:0; z-index:0; opacity:.4;
+    background-image:
+      linear-gradient(to right, rgba(26,26,26,.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(26,26,26,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    mask-image: linear-gradient(180deg, transparent 0%, black 20%, black 80%, transparent 100%);
+  }
+
+  .hero-kicker{
+    display:flex; gap:10px; align-items:center;
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-mute); margin-bottom:28px;
+    position:relative; z-index:2;
+    opacity:0; animation: rise .7s ease-out .1s forwards;
+  }
+  .hero-kicker .pill{
+    background:var(--bg-ink); color:var(--bg); padding:5px 12px; border-radius:100px;
+    letter-spacing:.15em;
+  }
+  .hero-kicker .pill.te{background:var(--te); color:white}
+  .hero-kicker .pill.webex{background:var(--webex); color:var(--webex-deep)}
+
+  .hero-title{
+    font-family:'Instrument Serif', serif;
+    font-size:clamp(48px, 8.5vw, 128px);
+    line-height:.95; letter-spacing:-.025em; font-weight:400;
+    max-width:1250px;
+    position:relative; z-index:2;
+  }
+  .hero-title .line{display:block; opacity:0; transform:translateY(30px); animation: rise .9s cubic-bezier(.2,.7,.2,1) forwards}
+  .hero-title .line:nth-child(1){animation-delay:.2s}
+  .hero-title .line:nth-child(2){animation-delay:.4s}
+  .hero-title .line:nth-child(3){animation-delay:.6s}
+  .hero-title em{font-style:italic; color:var(--ink-mute); font-weight:300}
+  .hero-title .hl{color:var(--te); font-style:italic}
+  @keyframes rise{to{opacity:1; transform:translateY(0)}}
+
+  .hero-sub{
+    margin-top:40px; max-width:760px;
+    font-size:18px; line-height:1.6; color:var(--ink-soft);
+    position:relative; z-index:2;
+    opacity:0; animation: rise .7s ease-out .8s forwards;
+  }
+  .hero-sub strong{color:var(--ink); font-weight:600}
+
+  /* seller's toolbox row */
+  .tool-row{
+    margin-top:64px;
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:0;
+    border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    position:relative; z-index:2;
+    opacity:0; animation: rise .7s ease-out 1s forwards;
+  }
+  .tool-item{
+    padding:24px 20px;
+    border-right:1px solid var(--line);
+  }
+  .tool-item:last-child{border-right:0}
+  .tool-item .n{
+    font-family:'DM Mono', monospace; font-size:10px;
+    color:var(--ink-faint); letter-spacing:.2em; margin-bottom:8px;
+  }
+  .tool-item .t{
+    font-family:'Instrument Serif', serif; font-size:22px;
+    line-height:1.15; color:var(--ink); font-weight:400;
+  }
+  .tool-item .t em{font-style:italic; color:var(--ink-mute)}
+
+  /* ============ SECTION COMMON ============ */
+  section{padding:110px 0; position:relative}
+  .sec-head{max-width:900px; margin-bottom:60px}
+  .sec-kicker{
+    display:flex; align-items:center; gap:14px;
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--webex-deep); margin-bottom:20px;
+  }
+  .sec-kicker::before{
+    content:""; width:36px; height:1px; background:var(--webex);
+  }
+  .sec-title{
+    font-family:'Instrument Serif', serif;
+    font-size:clamp(36px, 5vw, 68px);
+    letter-spacing:-.02em; line-height:1.02; font-weight:400;
+  }
+  .sec-title em{font-style:italic; color:var(--ink-mute); font-weight:300}
+  .sec-lede{
+    margin-top:22px; font-size:17px; color:var(--ink-soft); line-height:1.65;
+    max-width:720px;
+  }
+
+  .reveal{opacity:0; transform:translateY(24px); transition: all .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1; transform:translateY(0)}
+
+  /* ============ SECTION 1: THE PITCH ============ */
+  .pitch-grid{
+    display:grid; grid-template-columns: 1fr 1fr 1fr; gap:24px;
+  }
+  .pitch-card{
+    background:white; border:1px solid var(--line); border-radius:4px;
+    padding:32px 28px;
+    position:relative; overflow:hidden;
+    transition: all .3s ease;
+  }
+  .pitch-card:hover{
+    transform:translateY(-3px);
+    box-shadow: 0 20px 40px -20px rgba(233,84,32,.2);
+    border-color:var(--te);
+  }
+  .pitch-card .num{
+    font-family:'Instrument Serif', serif; font-style:italic;
+    font-size:54px; color:var(--te); line-height:1; font-weight:400;
+    margin-bottom:16px;
+  }
+  .pitch-card h3{
+    font-family:'Instrument Serif', serif; font-size:26px;
+    line-height:1.15; margin-bottom:14px; letter-spacing:-.01em; font-weight:500;
+  }
+  .pitch-card p{font-size:14px; color:var(--ink-soft); line-height:1.6}
+  .pitch-card .tag{
+    margin-top:16px;
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--ink-mute);
+  }
+
+  /* ============ SECTION 2: SELLER TAKEAWAY ============ */
+  .takeaway{
+    background:var(--bg-ink); color:var(--bg);
+    padding:80px; border-radius:6px;
+    position:relative; overflow:hidden;
+  }
+  .takeaway::before{
+    content:""; position:absolute; inset:0;
+    background:
+      radial-gradient(circle at 85% 30%, rgba(233,84,32,.18), transparent 50%),
+      radial-gradient(circle at 15% 80%, rgba(0,188,235,.10), transparent 55%);
+  }
+  .takeaway-label{
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--te); margin-bottom:24px;
+    position:relative; z-index:2;
+  }
+  .takeaway h2{
+    font-family:'Instrument Serif', serif;
+    font-size:clamp(30px, 4vw, 52px); line-height:1.1;
+    letter-spacing:-.02em; max-width:1100px;
+    position:relative; z-index:2; font-weight:400;
+  }
+  .takeaway h2 em{font-style:italic; color:#9d9d96}
+  .takeaway h2 .hl{color:var(--te); font-style:italic}
+  .takeaway-pull{
+    margin-top:48px; padding-top:36px; border-top:1px solid #2a2a2d;
+    display:grid; grid-template-columns: 1fr 1fr; gap:60px;
+    position:relative; z-index:2;
+  }
+  .takeaway-pull .say{
+    font-family:'Instrument Serif', serif; font-style:italic;
+    font-size:22px; line-height:1.3; color:#f2f2ef;
+  }
+  .takeaway-pull .label{
+    font-family:'DM Mono', monospace; font-size:10px;
+    letter-spacing:.2em; text-transform:uppercase; color:var(--ink-faint);
+    margin-bottom:12px;
+  }
+
+  /* ============ SECTION 3: COMPETITOR LANDSCAPE ============ */
+  /* Two-row landscape: Collab vs Teams/Zoom; CX vs Genesys/NICE/Five9 */
+  .land-section-label{
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--ink-mute); margin: 36px 0 16px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .land-section-label::before{
+    content:""; width:20px; height:1px; background:var(--ink-mute);
+  }
+
+  .land-grid{display:grid; grid-template-columns: 1fr 1fr; gap:0; border-top:2px solid var(--ink); border-bottom:2px solid var(--ink)}
+  .land-grid.three{grid-template-columns: 1fr 1fr 1fr}
+  .land-col{padding:28px 22px; border-right:1px solid var(--line); position:relative; background:var(--bg-warm); min-height:440px}
+  .land-col:last-child{border-right:0}
+  .land-col .vendor{
+    font-family:'Instrument Serif', serif; font-size:22px;
+    margin-bottom:6px; font-weight:500;
+  }
+  .land-col .dem-name{
+    font-family:'DM Mono', monospace; font-size:10px;
+    letter-spacing:.15em; text-transform:uppercase; color:var(--ink-mute);
+    margin-bottom:22px; padding-bottom:12px; border-bottom:1px solid var(--line);
+  }
+  .land-col h5{
+    font-family:'DM Mono', monospace; font-size:10px;
+    letter-spacing:.15em; text-transform:uppercase; color:var(--ink-mute);
+    margin-top:20px; margin-bottom:8px;
+  }
+  .land-col p{font-size:13px; color:var(--ink-soft); line-height:1.55}
+  .land-col .verdict{
+    position:absolute; bottom:20px; left:22px; right:22px;
+    padding-top:16px; border-top:1px dashed var(--line-strong);
+    font-family:'Instrument Serif', serif; font-style:italic; font-size:15px;
+    color:var(--ink); line-height:1.35;
+  }
+  .land-col.teams{background: linear-gradient(180deg, rgba(91,95,199,.07), transparent 70%), var(--bg-warm)}
+  .land-col.zoom{background: linear-gradient(180deg, rgba(45,140,255,.07), transparent 70%), var(--bg-warm)}
+  .land-col.genesys{background: linear-gradient(180deg, rgba(168,45,15,.07), transparent 70%), var(--bg-warm)}
+  .land-col.nice{background: linear-gradient(180deg, rgba(0,102,204,.07), transparent 70%), var(--bg-warm)}
+  .land-col.five9{background: linear-gradient(180deg, rgba(91,184,91,.07), transparent 70%), var(--bg-warm)}
+  .land-col.amzn{background: linear-gradient(180deg, rgba(255,153,0,.07), transparent 70%), var(--bg-warm)}
+
+  .land-col .vendor-chip{
+    font-family:'DM Mono', monospace; font-size:9px; letter-spacing:.2em;
+    text-transform:uppercase; padding:3px 8px; border-radius:2px;
+    color:white; margin-bottom:10px; display:inline-block;
+  }
+  .land-col.teams .vendor-chip{background:var(--teams)}
+  .land-col.zoom .vendor-chip{background:var(--zoom)}
+  .land-col.genesys .vendor-chip{background:var(--genesys-safe)}
+  .land-col.nice .vendor-chip{background:var(--nice)}
+  .land-col.five9 .vendor-chip{background:var(--five9)}
+  .land-col.amzn .vendor-chip{background:var(--amzn); color:#1a1a1a}
+
+  /* ============ SECTION 4: THE WEDGE TABLE ============ */
+  .wedge-intro{
+    background:white; padding:36px; border:1px solid var(--line); border-radius:4px;
+    margin-bottom:36px; display:flex; gap:30px; align-items:flex-start;
+  }
+  .wedge-intro .icon-box{
+    flex-shrink:0; width:64px; height:64px; border-radius:4px;
+    background:var(--te); color:white;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Instrument Serif', serif; font-size:36px; font-style:italic;
+  }
+  .wedge-intro .content h4{
+    font-family:'Instrument Serif', serif; font-size:24px;
+    margin-bottom:8px; font-weight:500;
+  }
+  .wedge-intro .content p{color:var(--ink-soft); font-size:15px; line-height:1.6}
+
+  .wedge-table{
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; background:white;
+    margin-bottom:48px;
+  }
+  .wedge-head{
+    display:grid;
+    grid-template-columns: 1.8fr 1.2fr 1fr 1fr;
+    background:var(--bg-ink); color:white;
+  }
+  .wedge-head.cx{
+    grid-template-columns: 1.8fr 1.2fr 1fr 1fr 1fr;
+  }
+  .wedge-head .th{
+    padding:20px 18px;
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.15em; text-transform:uppercase;
+    border-right:1px solid #2a2a2d;
+  }
+  .wedge-head .th:last-child{border-right:0}
+  .wedge-head .th.us{color:var(--te); background:rgba(233,84,32,.08)}
+
+  .wedge-row{
+    display:grid;
+    grid-template-columns: 1.8fr 1.2fr 1fr 1fr;
+    border-top:1px solid var(--line);
+  }
+  .wedge-row.cx{
+    grid-template-columns: 1.8fr 1.2fr 1fr 1fr 1fr;
+  }
+  .wedge-row:hover{background:var(--bg-warm)}
+  .wedge-row .td{
+    padding:18px;
+    font-size:13.5px; line-height:1.5;
+    border-right:1px solid var(--line);
+  }
+  .wedge-row .td:last-child{border-right:0}
+  .wedge-row .cap{
+    font-family:'Instrument Serif', serif; font-size:17px;
+    line-height:1.2; font-weight:500;
+  }
+  .wedge-row .cap .sub{
+    display:block; font-family:'Manrope', sans-serif; font-size:12px; font-weight:400;
+    color:var(--ink-mute); margin-top:3px;
+  }
+  .wedge-row .us{background:rgba(233,84,32,.05); border-left:2px solid var(--te); border-right:2px solid var(--te)}
+
+  .mark{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.1em;
+    text-transform:uppercase; padding:3px 8px; border-radius:2px;
+    margin-bottom:6px;
+  }
+  .mark.yes{background:rgba(46,125,50,.1); color:var(--moss)}
+  .mark.partial{background:rgba(199,124,0,.12); color:var(--warn)}
+  .mark.no{background:rgba(139,31,31,.1); color:var(--crimson)}
+  .mark.best{background:var(--te); color:white}
+  .mark-detail{display:block; color:var(--ink-soft); font-size:12.5px; line-height:1.5}
+
+  .table-tag{
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase;
+    color:var(--te); margin-bottom:14px;
+    display:flex; align-items:center; gap:14px;
+  }
+  .table-tag::before{content:""; width:24px; height:1px; background:var(--te)}
+
+  /* ============ SECTION 5: DIFFERENTIATORS ============ */
+  .diff-list{display:flex; flex-direction:column; gap:6px}
+  .diff-item{
+    display:grid; grid-template-columns: 80px 1fr 1.2fr; gap:40px; align-items:center;
+    padding:40px 32px; background:white; border:1px solid var(--line); border-radius:4px;
+    transition: all .3s ease;
+  }
+  .diff-item:hover{
+    background:var(--bg-warm);
+    border-color:var(--te);
+    transform: translateX(6px);
+  }
+  .diff-item .n{
+    font-family:'Instrument Serif', serif; font-style:italic;
+    font-size:64px; color:var(--te); line-height:1; font-weight:400;
+  }
+  .diff-item .title{
+    font-family:'Instrument Serif', serif; font-size:26px;
+    line-height:1.15; letter-spacing:-.01em; font-weight:500;
+  }
+  .diff-item .title em{font-style:italic; color:var(--ink-mute)}
+  .diff-item .desc{font-size:14px; color:var(--ink-soft); line-height:1.6}
+  .diff-item .desc strong{color:var(--ink); font-weight:600}
+  .diff-item .tag{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.15em;
+    text-transform:uppercase; color:var(--te); margin-top:10px; display:inline-block;
+  }
+
+  /* ============ SECTION 6: OBJECTION SIMULATOR ============ */
+  .sim-frame{
+    background:var(--bg-ink); color:white; padding:60px; border-radius:6px;
+    position:relative; overflow:hidden;
+  }
+  .sim-frame::before{
+    content:""; position:absolute; inset:0;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.02) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.02) 1px, transparent 1px);
+    background-size:32px 32px;
+  }
+  .sim-intro{
+    font-family:'Instrument Serif', serif; font-size:24px; line-height:1.3;
+    color:#d8d8d2; max-width:800px; margin-bottom:40px; position:relative; z-index:2;
+    font-weight:400;
+  }
+  .sim-intro em{color:var(--te); font-style:italic}
+
+  .sim-tabs{
+    display:flex; gap:0; border-bottom:1px solid #2a2a2d; margin-bottom:32px;
+    position:relative; z-index:2; overflow-x:auto; flex-wrap:nowrap;
+  }
+  .sim-tab{
+    background:transparent; border:0; cursor:pointer; padding:16px 22px;
+    color:var(--ink-faint); white-space:nowrap;
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.15em;
+    text-transform:uppercase; position:relative; transition: color .2s;
+  }
+  .sim-tab:hover{color:#fff}
+  .sim-tab.active{color:var(--te)}
+  .sim-tab.active::after{
+    content:""; position:absolute; bottom:-1px; left:0; right:0; height:2px;
+    background:var(--te);
+  }
+
+  .sim-panel{display:none; position:relative; z-index:2}
+  .sim-panel.active{display:grid; grid-template-columns: 1fr 1fr; gap:32px}
+
+  .sim-q, .sim-a{padding:32px; border-radius:4px}
+  .sim-q{
+    background: rgba(255,255,255,.04); border-left:3px solid var(--teams);
+  }
+  .sim-q .role{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--webex); margin-bottom:12px;
+  }
+  .sim-q .msg{
+    font-family:'Instrument Serif', serif; font-size:22px; line-height:1.3;
+    color:white; font-weight:400;
+  }
+  .sim-a{
+    background: rgba(233,84,32,.08); border-left:3px solid var(--te);
+  }
+  .sim-a .role{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--te); margin-bottom:12px;
+  }
+  .sim-a .msg{font-size:15px; line-height:1.65; color:#e8e8e4}
+  .sim-a .msg strong{color:white; font-weight:600}
+  .sim-a .punch{
+    margin-top:16px; padding-top:16px; border-top:1px solid rgba(233,84,32,.2);
+    font-family:'Instrument Serif', serif; font-style:italic; font-size:16px;
+    color:var(--te);
+  }
+
+  /* ============ SECTION 7: SCENARIO MATRIX ============ */
+  .scen-matrix{
+    display:grid; grid-template-columns: repeat(3, 1fr); gap:24px;
+  }
+  .scen-card{
+    background:white; border:1px solid var(--line); border-radius:4px;
+    padding:32px; transition: all .3s ease;
+    position:relative;
+  }
+  .scen-card:hover{border-color:var(--webex); box-shadow:0 10px 30px -15px rgba(0,188,235,.25)}
+  .scen-card .ico{
+    width:44px; height:44px; border-radius:4px; background:var(--webex); color:white;
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Instrument Serif', serif; font-size:22px; font-style:italic;
+    margin-bottom:20px;
+  }
+  .scen-card h4{
+    font-family:'Instrument Serif', serif; font-size:22px; line-height:1.2;
+    margin-bottom:12px; font-weight:500;
+  }
+  .scen-card .situation{font-size:14px; color:var(--ink-soft); line-height:1.55; margin-bottom:20px}
+  .scen-card .outcome{
+    padding:14px 16px; background:var(--bg-warm); border-left:3px solid var(--te);
+    font-family:'Instrument Serif', serif; font-style:italic; font-size:15px;
+    color:var(--ink); line-height:1.4;
+  }
+  .scen-card .outcome strong{color:var(--te); font-style:normal; font-weight:600; font-family:'Manrope', sans-serif}
+  .scen-card .teaser{
+    margin-top:16px;
+    font-family:'DM Mono', monospace; font-size:10px; color:var(--webex-deep);
+    letter-spacing:.15em; text-transform:uppercase;
+  }
+
+  /* ============ SECTION 8: OBJECTION HANDLING (FAQ ACCORDION) ============ */
+  .obj-list{display:flex; flex-direction:column; gap:12px}
+  .obj-item{
+    background:white; border:1px solid var(--line); border-radius:4px;
+    overflow:hidden;
+  }
+  .obj-q{
+    padding:24px 28px; cursor:pointer;
+    display:flex; align-items:center; justify-content:space-between; gap:20px;
+    transition: background .2s;
+  }
+  .obj-q:hover{background:var(--bg-warm)}
+  .obj-q .q-text{
+    font-family:'Instrument Serif', serif; font-size:22px; line-height:1.25;
+    font-weight:500; flex:1;
+  }
+  .obj-q .q-text em{font-style:italic; color:var(--ink-mute)}
+  .obj-q .q-toggle{
+    flex-shrink:0; width:36px; height:36px; border-radius:50%;
+    background:var(--bg-warm); border:1px solid var(--line);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Instrument Serif', serif; font-size:22px; font-weight:300;
+    transition: all .3s ease;
+  }
+  .obj-item.open .q-toggle{background:var(--te); color:white; transform:rotate(45deg); border-color:var(--te)}
+  .obj-a{
+    max-height:0; overflow:hidden; transition: max-height .4s ease;
+    padding: 0 28px;
+  }
+  .obj-item.open .obj-a{max-height:600px; padding:0 28px 32px 28px}
+  .obj-a .label{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--te); margin-bottom:14px;
+  }
+  .obj-a p{font-size:15px; color:var(--ink-soft); line-height:1.65; margin-bottom:14px}
+  .obj-a p strong{color:var(--ink); font-weight:600}
+  .obj-a .evidence{
+    margin-top:14px; padding:14px 18px; background:var(--bg-warm); border-left:3px solid var(--webex);
+    font-size:13px; color:var(--ink-soft); line-height:1.55;
+  }
+  .obj-a .evidence strong{color:var(--webex-deep); font-weight:600; font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.1em; text-transform:uppercase; display:block; margin-bottom:6px}
+
+  /* ============ SECTION 9: SELLER WORKFLOW ============ */
+  .flow-grid{
+    display:grid; grid-template-columns: repeat(4, 1fr); gap:0;
+    border:1px solid var(--line); border-radius:4px; overflow:hidden; background:white;
+  }
+  .flow-step{
+    padding:32px 28px; border-right:1px solid var(--line);
+    position:relative;
+  }
+  .flow-step:last-child{border-right:0}
+  .flow-step .step-num{
+    font-family:'DM Mono', monospace; font-size:10px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-mute); margin-bottom:14px;
+  }
+  .flow-step .step-title{
+    font-family:'Instrument Serif', serif; font-size:22px; line-height:1.2;
+    margin-bottom:14px; font-weight:500;
+  }
+  .flow-step .step-desc{font-size:14px; color:var(--ink-soft); line-height:1.55}
+  .flow-step .step-prompt{
+    margin-top:16px; padding:12px 14px;
+    background:var(--bg-warm); border-left:2px solid var(--te);
+    font-family:'Instrument Serif', serif; font-style:italic; font-size:14px;
+    color:var(--ink); line-height:1.4;
+  }
+  .flow-step::after{
+    content:""; position:absolute; top:50%; right:-8px; width:14px; height:14px;
+    background:var(--te); border-radius:50%; transform:translateY(-50%);
+    border:3px solid var(--bg); z-index:2;
+  }
+  .flow-step:last-child::after{display:none}
+
+  /* ============ CLOSING BRIEF ============ */
+  .brief{
+    background: var(--bg-ink); color: var(--bg);
+    padding:90px 80px; border-radius:6px;
+    position:relative; overflow:hidden;
+  }
+  .brief::before{
+    content:""; position:absolute; top:-80px; right:-80px; width:400px; height:400px;
+    border-radius:50%; background: radial-gradient(circle, rgba(233,84,32,.30), transparent 70%);
+    filter:blur(40px);
+  }
+  .brief::after{
+    content:""; position:absolute; bottom:-100px; left:-100px; width:380px; height:380px;
+    border-radius:50%; background: radial-gradient(circle, rgba(0,188,235,.20), transparent 70%);
+    filter:blur(40px);
+  }
+  .brief-label{
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--te); margin-bottom:28px;
+    position:relative; z-index:2;
+  }
+  .brief h2{
+    font-family:'Instrument Serif', serif;
+    font-size:clamp(40px, 5.5vw, 80px); line-height:1.02; letter-spacing:-.02em;
+    max-width:1100px; font-weight:400; position:relative; z-index:2;
+  }
+  .brief h2 em{font-style:italic; color:#9b9b96}
+  .brief h2 .hl{color:var(--te); font-style:italic}
+
+  .brief-bottom{
+    margin-top:64px; padding-top:48px; border-top:1px solid #2a2a2d;
+    display:grid; grid-template-columns: 2fr 1fr; gap:60px;
+    position:relative; z-index:2;
+  }
+  .brief-msg h4{
+    font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em;
+    text-transform:uppercase; color:var(--ink-faint); margin-bottom:14px;
+  }
+  .brief-msg p{
+    font-family:'Instrument Serif', serif; font-size:26px; font-style:italic;
+    line-height:1.35; color:white; font-weight:400;
+  }
+  .brief-meta{
+    font-family:'DM Mono', monospace; font-size:11px; color:var(--ink-faint);
+    letter-spacing:.1em; line-height:1.8;
+  }
+  .brief-meta strong{color:white; font-weight:500}
+
+  /* ============ FOOTER ============ */
+  footer{
+    padding:40px 0; border-top:1px solid var(--line);
+    font-family:'DM Mono', monospace; font-size:10px; color:var(--ink-faint);
+    letter-spacing:.1em;
+  }
+  .foot-inner{display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap}
+  .foot-inner .left{max-width:760px; line-height:1.7}
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width: 1100px){
+    .wedge-head, .wedge-row{grid-template-columns: 1.8fr 1fr 1fr 1fr; font-size:12px}
+    .wedge-head.cx, .wedge-row.cx{grid-template-columns: 1.8fr 1fr 1fr 1fr 1fr}
+    .wedge-row .cap{font-size:15px}
+  }
+  @media (max-width: 900px){
+    .wrap{padding:0 20px}
+    .pitch-grid{grid-template-columns:1fr}
+    .land-grid, .land-grid.three{grid-template-columns:1fr 1fr}
+    .land-col{border-right:0; border-bottom:1px solid var(--line)}
+    .land-col:nth-child(odd){border-right:1px solid var(--line)}
+    .wedge-head, .wedge-row, .wedge-head.cx, .wedge-row.cx{grid-template-columns:1fr 1fr; font-size:12px}
+    .wedge-head .th{display:none}
+    .wedge-head .th:first-child{display:block; grid-column:1/-1}
+    .diff-item{grid-template-columns:1fr; gap:12px}
+    .diff-item .n{font-size:44px}
+    .sim-panel.active{grid-template-columns:1fr}
+    .scen-matrix{grid-template-columns:1fr}
+    .flow-grid{grid-template-columns:1fr}
+    .flow-step{border-right:0; border-bottom:1px solid var(--line)}
+    .takeaway-pull{grid-template-columns:1fr}
+    .brief-bottom{grid-template-columns:1fr}
+    .tool-row{grid-template-columns:1fr 1fr}
+    .tool-item:nth-child(2){border-right:0}
+    .tool-item:nth-child(1), .tool-item:nth-child(2){border-bottom:1px solid var(--line)}
+    .brief{padding:60px 36px}
+    .top-nav{display:none}
+  }
+
+</style>
+</head>
+<body>
+
+<!-- ============ TOPBAR ============ -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">
+      <div class="logo"></div>
+      <span>Cisco · Seller Enablement / Confidential</span>
+    </div>
+    <nav class="top-nav">
+      <a href="#pitch">The Pitch</a>
+      <a href="#landscape">Landscape</a>
+      <a href="#wedge">The Wedge</a>
+      <a href="#objections">Objections</a>
+      <a href="#brief">Brief</a>
+    </nav>
+    <div class="top-stamp">Battle Card · Q2 / 2026</div>
+  </div>
+</div>
+
+<!-- ============ HERO ============ -->
+<header class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="wrap">
+    <div class="hero-kicker">
+      <span class="pill webex">Webex Suite</span>
+      <span>+</span>
+      <span class="pill webex">Webex CC</span>
+      <span>×</span>
+      <span class="pill te">ThousandEyes</span>
+      <span style="margin-left:16px">Seller Battle Card · Collab + CX</span>
+    </div>
+    <h1 class="hero-title">
+      <span class="line">Teams ships an app.</span>
+      <span class="line">Zoom ships an app.</span>
+      <span class="line">We ship <span class="hl">the network it runs on</span>.</span>
+    </h1>
+    <p class="hero-sub">
+      Microsoft, Zoom, Genesys, NICE, Five9 — every collaboration and contact-center vendor sells software that lives on networks they don't own and can't see. <strong>Cisco is the only vendor that ships its collab platform together with the category-leading internet intelligence platform that monitors the network underneath it</strong> — natively, in the same Control Hub, on the same devices, by the same parent company. That's not a feature. That's a structural moat.
+    </p>
+
+    <div class="tool-row">
+      <div class="tool-item">
+        <div class="n">01 — THE SITUATION</div>
+        <div class="t">Every Webex deal is a <em>ThousandEyes</em> deal.</div>
+      </div>
+      <div class="tool-item">
+        <div class="n">02 — THE WEDGE</div>
+        <div class="t">Native integration <em>rivals literally cannot replicate</em>.</div>
+      </div>
+      <div class="tool-item">
+        <div class="n">03 — THE EVIDENCE</div>
+        <div class="t">Embedded in RoomOS. In Control Hub. Bidirectional.</div>
+      </div>
+      <div class="tool-item">
+        <div class="n">04 — THE CLOSE</div>
+        <div class="t">Activation is one click. Differentiation is permanent.</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ============ SECTION 1: THE PITCH ============ -->
+<section id="pitch" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 01 — The Thirty-Second Pitch</div>
+    <h2 class="sec-title">Three sentences. <em>In any order.</em></h2>
+    <p class="sec-lede">
+      Anchor every Webex or Webex Contact Center conversation in these three ideas. They form the strategic moat for Cisco Collaboration. If the customer takes only one thing away, make it one of these.
+    </p>
+  </div>
+
+  <div class="pitch-grid reveal">
+    <div class="pitch-card">
+      <div class="num">01</div>
+      <h3>Cisco is the only collaboration vendor that <em>owns</em> the network observability layer.</h3>
+      <p>Microsoft sells Teams. Zoom sells Zoom. Genesys, NICE, Five9 sell CX software. <strong>None of them own a category-leading internet intelligence platform.</strong> Cisco does — ThousandEyes — and it's wired directly into Webex Control Hub, embedded in RoomOS device firmware, and instrumented at every Webex data center.</p>
+      <div class="tag">Structural · Cannot be cloned</div>
+    </div>
+
+    <div class="pitch-card">
+      <div class="num">02</div>
+      <h3>The integration is <em>bidirectional</em>, not bolted on.</h3>
+      <p>ThousandEyes Cloud Agents sit at the front door of every Webex Meetings and Calling data center. Endpoint Agents on user laptops and Cisco RoomOS devices feed network path data <strong>directly into the Webex Control Hub Troubleshooting view</strong>. One click to cross-launch into ThousandEyes for hop-by-hop analysis. Rivals integrate via third-party tools like IR, Nectar, VOSS — Cisco integrates with itself.</p>
+      <div class="tag">Native · Same Control Hub</div>
+    </div>
+
+    <div class="pitch-card">
+      <div class="num">03</div>
+      <h3>For Contact Center, this is <em>existential</em>.</h3>
+      <p>A laggy Webex meeting is annoying. A laggy Webex Contact Center call costs the customer's customer — and the brand pays. Genesys, NICE, and Five9 customers stitch together Operata, IR, and Nectar to chase root cause. <strong>Cisco's CX team can prove "it's not us" in minutes, with evidence the carrier can't dispute.</strong> No competitor can match that loop.</p>
+      <div class="tag">CX-decisive · Brand-defending</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 2: TAKEAWAY ============ -->
+<section class="wrap">
+  <div class="takeaway reveal">
+    <div class="takeaway-label">§ Seller Mindset · Read Before Every Call</div>
+    <h2>
+      The customer is comparing Webex to Teams or Zoom <em>at the app layer</em>.<br/>
+      Don't fight there. <span class="hl">Move the comparison down a layer</span> — to the network<br/>nobody else can see, and only Cisco can prove.
+    </h2>
+    <div class="takeaway-pull">
+      <div>
+        <div class="label">Don't say</div>
+        <div class="say">"Webex has better video quality than Teams."</div>
+      </div>
+      <div>
+        <div class="label">Do say</div>
+        <div class="say">"Webex is the only platform where, when something <em>does</em> go wrong, you can prove whose fault it is — without buying a third-party observability tool."</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 3: COMPETITOR LANDSCAPE ============ -->
+<section id="landscape" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 02 — Know The Field</div>
+    <h2 class="sec-title">Six rivals, two markets. <em>Each leaves the network blind.</em></h2>
+    <p class="sec-lede">
+      Walk in respecting what each rival has built — they all have legitimate observability stories at the application layer. The seam is identical across all of them: <strong>none owns a network intelligence platform, so all of them depend on third-party monitoring tools</strong> like IR, Nectar, Operata, and VOSS to fill the gap.
+    </p>
+  </div>
+
+  <div class="land-section-label reveal">Collaboration · UCaaS rivals</div>
+  <div class="land-grid reveal">
+    <div class="land-col teams">
+      <div class="vendor-chip">Microsoft</div>
+      <div class="vendor">Microsoft Teams</div>
+      <div class="dem-name">Call Quality Dashboard · Teams Admin Center</div>
+
+      <h5>What it is</h5>
+      <p>Teams CQD provides per-call quality scores, network metrics from the Teams client, and Microsoft 365 Admin Center reporting. Strong inside Microsoft's own telemetry universe — endpoint network adapter info, jitter, packet loss as measured by the client.</p>
+
+      <h5>The seam</h5>
+      <p>CQD reports <em>what the Teams client experienced</em>. It cannot independently verify whether the ISP, DNS, BGP, or the path between the user and the Teams cloud is at fault. Microsoft has no equivalent of ThousandEyes. Customers routinely buy IR, Nectar, or VOSS specifically to get end-to-end visibility CQD doesn't provide.</p>
+
+      <div class="verdict">"Telemetry from Teams, not telemetry of the network beneath Teams."</div>
+    </div>
+
+    <div class="land-col zoom">
+      <div class="vendor-chip">Zoom</div>
+      <div class="vendor">Zoom Workplace + Phone</div>
+      <div class="dem-name">Zoom QSS · Zoom Dashboard</div>
+
+      <h5>What it is</h5>
+      <p>Zoom Quality of Service Subscription (QSS) and the Zoom Dashboard provide call quality, device, and meeting-level analytics. Pretty UI, decent depth — but again, the data is what Zoom's client measured, fed back into Zoom's own analytics.</p>
+
+      <h5>The seam</h5>
+      <p>Zoom owns no network intelligence platform. No BGP visibility. No global cloud agent mesh outside its own data centers. Zoom customers commonly deploy Operata or Nectar for true end-to-end observability — adding cost, integration overhead, and another vendor relationship just to reach parity with what Cisco ships in the box.</p>
+
+      <div class="verdict">"Pretty dashboards. Same architectural ceiling as Teams."</div>
+    </div>
+  </div>
+
+  <div class="land-section-label reveal">Customer Experience · CCaaS rivals</div>
+  <div class="land-grid three reveal">
+    <div class="land-col genesys">
+      <div class="vendor-chip">Genesys</div>
+      <div class="vendor">Genesys Cloud CX</div>
+      <div class="dem-name">Built-in monitoring + AppFoundry partners</div>
+
+      <h5>What it is</h5>
+      <p>Genesys has its own monitoring snapshots tool for agents, edges, trunks, websites. The AppFoundry marketplace lists IR, Nectar, VOSS, Operata, and others as observability extensions — explicitly because the platform itself doesn't ship deep network intelligence.</p>
+
+      <h5>The seam</h5>
+      <p>Genesys partners aggressively with third-party monitoring vendors precisely <em>because</em> the platform alone cannot answer "why is my Genesys Cloud agent's voice quality bad right now and is it our network or theirs?" Customers pay twice — once for Genesys, once for the observability layer.</p>
+
+      <div class="verdict">"Strong CX features. The network observability is somebody else's product."</div>
+    </div>
+
+    <div class="land-col nice">
+      <div class="vendor-chip">NICE</div>
+      <div class="vendor">NICE CXone</div>
+      <div class="dem-name">CXone Mpower analytics + partners</div>
+
+      <h5>What it is</h5>
+      <p>NICE CXone is a strong CCaaS platform with deep WFM, QM, and analytics. Network monitoring relies on agent-side telemetry surfaced in CXone's reporting plus integrations with Nectar, IR, and others.</p>
+
+      <h5>The seam</h5>
+      <p>Same pattern as Genesys. Network and internet path visibility comes from a partner ecosystem, not from NICE itself. The agent's experience can be diagnosed; the path between agent and CXone cloud cannot — without buying additional tools.</p>
+
+      <div class="verdict">"Top-tier CX. Network intelligence rented from third parties."</div>
+    </div>
+
+    <div class="land-col five9">
+      <div class="vendor-chip">Five9</div>
+      <div class="vendor">Five9 Intelligent CX</div>
+      <div class="dem-name">VCC + integrations</div>
+
+      <h5>What it is</h5>
+      <p>Five9 is a credible mid-market CCaaS with strong AI agent and IVA capabilities. Voice quality monitoring exists at the platform level. Like the others, deeper network observability is a partner integration.</p>
+
+      <h5>The seam</h5>
+      <p>Five9 has no parent-company network intelligence platform to lean on. When voice quality degrades, the troubleshooting trail leads to either the carrier (cooperation varies) or a third-party monitoring tool the customer purchased separately.</p>
+
+      <div class="verdict">"Solid product. Same architectural gap."</div>
+    </div>
+  </div>
+
+  <p class="mono reveal" style="margin-top:36px; font-size:11px; color:var(--ink-faint); letter-spacing:.1em; line-height:1.7">
+    // The pattern is consistent: every collab and CX rival relies on either app-layer telemetry or third-party network observability vendors. <strong style="color:var(--ink-soft); font-weight:600">Only Cisco owns both the collab platform AND the internet intelligence platform.</strong>
+  </p>
+</section>
+
+<!-- ============ SECTION 4: THE WEDGE TABLES ============ -->
+<section id="wedge" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 03 — The Wedge</div>
+    <h2 class="sec-title">Where the rivals stop being comparable <em>and start being uncontested</em>.</h2>
+    <p class="sec-lede">
+      Two tables. The first compares Cisco Collab against Microsoft and Zoom on observability capabilities. The second compares Webex Contact Center against Genesys, NICE, and Five9. The first three rows in each are roughly competitive at the application layer. The remaining rows are where Cisco stands alone.
+    </p>
+  </div>
+
+  <div class="wedge-intro reveal">
+    <div class="icon-box">§</div>
+    <div class="content">
+      <h4>The integration depth is the moat.</h4>
+      <p>Don't pretend rivals have nothing. Microsoft CQD is real. Zoom QSS is real. Genesys monitoring is real. The differentiator is that Cisco's network observability is <strong>built by the same company, integrated into the same Control Hub, embedded in the same device firmware</strong>. Rivals would need to buy or build a ThousandEyes equivalent — and even then, ship it natively into their UCaaS/CCaaS — to match.</p>
+    </div>
+  </div>
+
+  <!-- TABLE 1 — Collaboration: Cisco vs Teams vs Zoom -->
+  <div class="reveal">
+    <div class="table-tag">Table 01 · Collaboration · Webex vs. Teams vs. Zoom</div>
+  </div>
+
+  <div class="wedge-table reveal">
+    <div class="wedge-head">
+      <div class="th">Capability</div>
+      <div class="th us">Webex + ThousandEyes</div>
+      <div class="th">Microsoft Teams</div>
+      <div class="th">Zoom</div>
+    </div>
+
+    <!-- Baseline -->
+    <div class="wedge-row">
+      <div class="td cap">In-app call quality metrics<span class="sub">Latency, loss, jitter from the client</span></div>
+      <div class="td us"><span class="mark yes">Yes</span><span class="mark-detail">Webex Control Hub Troubleshooting</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Teams Call Quality Dashboard</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Zoom Dashboard / QSS</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">AI-powered meeting summaries &amp; assistance<span class="sub">Notes, transcription, action items</span></div>
+      <div class="td us"><span class="mark yes">Yes</span><span class="mark-detail">Webex AI Assistant</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Microsoft 365 Copilot</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Zoom AI Companion</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">Native devices and rooms ecosystem<span class="sub">Cameras, codecs, room kits</span></div>
+      <div class="td us"><span class="mark yes">Yes</span><span class="mark-detail">Cisco RoomOS device family</span></div>
+      <div class="td"><span class="mark partial">Certified third-party</span><span class="mark-detail">Teams Rooms — partner-built</span></div>
+      <div class="td"><span class="mark partial">Certified third-party</span><span class="mark-detail">Zoom Rooms — partner-built</span></div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="wedge-row" style="background:var(--bg-ink); color:white">
+      <div class="td" style="font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--te); border-right-color:#2a2a2d; grid-column:1/-1; padding:14px 18px;">
+        ↓ Below this line, parity ends
+      </div>
+    </div>
+
+    <!-- WEDGE -->
+    <div class="wedge-row">
+      <div class="td cap">Network path visibility natively in Control Hub<span class="sub">Hop-by-hop, per-meeting, per-call</span></div>
+      <div class="td us"><span class="mark best">Native &amp; bidirectional</span><span class="mark-detail">ThousandEyes Network Path data appears inline in Webex Troubleshooting; one-click cross-launch into ThousandEyes for full analysis</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">CQD shows client-side metrics only</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Dashboard shows client-side metrics only</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">Cloud Agents in the meeting/calling data centers<span class="sub">Bidirectional path measurement</span></div>
+      <div class="td us"><span class="mark best">Webex DCs instrumented</span><span class="mark-detail">ThousandEyes Cloud Agents at the front door of Webex Meetings and Calling data centers — available to all customers</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">No equivalent vantage points</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">No equivalent vantage points</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">Endpoint Agent embedded in device firmware<span class="sub">Hop-by-hop visibility from rooms</span></div>
+      <div class="td us"><span class="mark best">RoomOS native</span><span class="mark-detail">ThousandEyes Endpoint Agent is part of RoomOS firmware — activated via Control Hub on Board, Desk, Room series</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Teams Rooms run on third-party hardware; no equivalent</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Zoom Rooms run on third-party hardware; no equivalent</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">BGP, DNS, internet outage intelligence<span class="sub">Macro context for collab disruptions</span></div>
+      <div class="td us"><span class="mark best">Native</span><span class="mark-detail">ThousandEyes BGP collectors, DNS+ tests, Internet Outages Map — all available alongside meeting telemetry</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Outside Microsoft's monitoring scope</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Outside Zoom's monitoring scope</span></div>
+    </div>
+
+    <div class="wedge-row">
+      <div class="td cap">Single vendor accountability for collab AND network<span class="sub">One throat to choke</span></div>
+      <div class="td us"><span class="mark best">Yes</span><span class="mark-detail">Cisco owns both Webex and ThousandEyes — same support, same roadmap, same SLAs</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Customer must own integration with IR, Nectar, VOSS, etc.</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Customer must own integration with Operata, Nectar, etc.</span></div>
+    </div>
+  </div>
+
+  <!-- TABLE 2 — Contact Center: Cisco vs Genesys vs NICE vs Five9 -->
+  <div class="reveal" style="margin-top:48px">
+    <div class="table-tag">Table 02 · Contact Center · Webex CC vs. Genesys vs. NICE vs. Five9</div>
+  </div>
+
+  <div class="wedge-table reveal">
+    <div class="wedge-head cx">
+      <div class="th">Capability</div>
+      <div class="th us">Webex CC + ThousandEyes</div>
+      <div class="th">Genesys Cloud</div>
+      <div class="th">NICE CXone</div>
+      <div class="th">Five9</div>
+    </div>
+
+    <div class="wedge-row cx">
+      <div class="td cap">AI agent assist &amp; automation<span class="sub">Suggested responses, summaries, sentiment</span></div>
+      <div class="td us"><span class="mark yes">Cisco AI Assistant</span><span class="mark-detail">Real-Time Assist, AI QM, Auto CSAT, Topic Analytics</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Genesys AI suite</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">NICE Enlighten AI</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Five9 Genius AI</span></div>
+    </div>
+
+    <div class="wedge-row cx">
+      <div class="td cap">Salesforce / ServiceNow / Epic integration<span class="sub">CRM and EHR embedding</span></div>
+      <div class="td us"><span class="mark yes">Yes</span><span class="mark-detail">Service Cloud Voice, ServiceNow, Epic GA</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Strong CRM ecosystem</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Deep Salesforce integration</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Strong CRM tie-ins</span></div>
+    </div>
+
+    <div class="wedge-row cx">
+      <div class="td cap">Quality Management &amp; recording<span class="sub">QM, screen recording, evaluation forms</span></div>
+      <div class="td us"><span class="mark yes">Webex AI QM</span><span class="mark-detail">AI-scored evals, real-time insight, coaching</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Genesys QM (industry baseline)</span></div>
+      <div class="td"><span class="mark best">Category leader</span><span class="mark-detail">NICE WFO is the QM benchmark</span></div>
+      <div class="td"><span class="mark yes">Yes</span><span class="mark-detail">Five9 WFO</span></div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="wedge-row" style="background:var(--bg-ink); color:white">
+      <div class="td" style="font-family:'DM Mono', monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--te); border-right-color:#2a2a2d; grid-column:1/-1; padding:14px 18px;">
+        ↓ Below this line, parity ends
+      </div>
+    </div>
+
+    <div class="wedge-row cx">
+      <div class="td cap">Native end-to-end network path for agent calls<span class="sub">Customer → ISP → CCaaS → agent</span></div>
+      <div class="td us"><span class="mark best">Native</span><span class="mark-detail">ThousandEyes hop-by-hop visibility from agent endpoint to Webex Calling DC, surfaced in Control Hub</span></div>
+      <div class="td"><span class="mark no">Third-party</span><span class="mark-detail">Requires Operata, IR, or Nectar</span></div>
+      <div class="td"><span class="mark no">Third-party</span><span class="mark-detail">Requires Nectar, IR partners</span></div>
+      <div class="td"><span class="mark no">Third-party</span><span class="mark-detail">Requires partner ecosystem</span></div>
+    </div>
+
+    <div class="wedge-row cx">
+      <div class="td cap">Independent ISP / carrier evidence<span class="sub">Proof when carrier blames you</span></div>
+      <div class="td us"><span class="mark best">Industry standard</span><span class="mark-detail">ThousandEyes data is the de facto third-party-trusted source for ISP escalations</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Vendor-owned telemetry only</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Vendor-owned telemetry only</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Vendor-owned telemetry only</span></div>
+    </div>
+
+    <div class="wedge-row cx">
+      <div class="td cap">Remote agent home-network visibility<span class="sub">WFH agents on residential ISPs</span></div>
+      <div class="td us"><span class="mark best">Yes</span><span class="mark-detail">ThousandEyes Endpoint Agent on agent laptops; correlates Wi-Fi, ISP, VPN, CCaaS path</span></div>
+      <div class="td"><span class="mark partial">Partner</span><span class="mark-detail">Operata browser extension or similar</span></div>
+      <div class="td"><span class="mark partial">Partner</span><span class="mark-detail">Third-party telemetry tools</span></div>
+      <div class="td"><span class="mark partial">Partner</span><span class="mark-detail">Third-party telemetry tools</span></div>
+    </div>
+
+    <div class="wedge-row cx">
+      <div class="td cap">BGP &amp; internet outage correlation for CX<span class="sub">"Why are calls dropping in São Paulo?"</span></div>
+      <div class="td us"><span class="mark best">Native</span><span class="mark-detail">Internet Outages Map + BGP intelligence available alongside CC analytics</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not in product</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not in product</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">Not in product</span></div>
+    </div>
+
+    <div class="wedge-row cx">
+      <div class="td cap">Single vendor for CC + collab + network<span class="sub">Unified buying, support, roadmap</span></div>
+      <div class="td us"><span class="mark best">Yes</span><span class="mark-detail">Webex CC + Webex Suite + ThousandEyes — all Cisco</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">CCaaS only; UC and network are other vendors</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">CCaaS only; UC and network are other vendors</span></div>
+      <div class="td"><span class="mark no">No</span><span class="mark-detail">CCaaS only; UC and network are other vendors</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 5: DIFFERENTIATORS ============ -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 04 — Four Talking Points You Own</div>
+    <h2 class="sec-title">Differentiators that <em>cannot be copied</em> by Microsoft, Zoom, or Genesys.</h2>
+    <p class="sec-lede">
+      These four points are structural — not features that a competitor could clone in their next release. They follow from Cisco's ownership of ThousandEyes and the depth of integration into Webex Control Hub and RoomOS.
+    </p>
+  </div>
+
+  <div class="diff-list reveal">
+    <div class="diff-item">
+      <div class="n">I.</div>
+      <div class="title">Network Path data <em>inside</em> the Webex Troubleshooting view.</div>
+      <div class="desc">When a user with the ThousandEyes Endpoint Agent joins a Webex meeting, a <strong>Network Path line appears under Audio Quality in their participant details</strong> — directly in Control Hub. One click cross-launches into ThousandEyes for hop-by-hop analysis. No tab switching. No CSV export. No third-party tool. Microsoft and Zoom literally cannot replicate this without acquiring an internet intelligence company.<div class="tag">Seller line: "It's not an integration. It's the same screen."</div></div>
+    </div>
+
+    <div class="diff-item">
+      <div class="n">II.</div>
+      <div class="title">RoomOS firmware ships ThousandEyes <em>as part of the device</em>.</div>
+      <div class="desc">Cisco Board, Desk, and Room series devices contain the ThousandEyes Endpoint Agent in firmware. Activate it from Control Hub with a license. <strong>No software install. No agent deployment. No room-by-room rollout.</strong> Teams Rooms and Zoom Rooms run on third-party hardware — Logitech, Poly, Neat, Yealink — none of which embed network intelligence at the firmware level. Cisco's vertical hardware/software/observability integration is unmatched in the room.<div class="tag">Seller line: "Every room is already instrumented. Activate and go."</div></div>
+    </div>
+
+    <div class="diff-item">
+      <div class="n">III.</div>
+      <div class="title">Webex data centers are <em>instrumented from the inside</em>.</div>
+      <div class="desc">ThousandEyes operates Webex-specific Cloud Agents at the front door of Webex Meetings and Webex Calling data centers globally. <strong>The traffic destination has measurement points; the source has measurement points; the path between them is therefore observable bidirectionally.</strong> No competitor has equivalent presence inside their own delivery infrastructure paired with global ISP-side vantage points. This is uniquely Cisco's network primacy compounding into a Cisco collab advantage.<div class="tag">Seller line: "Both ends of the call are watched. By the same platform."</div></div>
+    </div>
+
+    <div class="diff-item">
+      <div class="n">IV.</div>
+      <div class="title">Contact Center calls get <em>brand-grade evidence</em> when something goes wrong.</div>
+      <div class="desc">A Webex Contact Center call has stakes: it's the customer talking to the brand. When that call degrades, "we'll look into it" isn't an answer. With ThousandEyes embedded, supervisors can isolate within minutes whether it's the agent's home Wi-Fi, the agent's ISP, the carrier transit, or the Webex Calling DC. <strong>Genesys, NICE, and Five9 customers wait for third-party tools to investigate — or for the carrier to admit fault.</strong> Cisco closes the loop in real time.<div class="tag">Seller line: "Your brand's voice quality, defended in minutes — not days."</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 6: OBJECTION SIMULATOR ============ -->
+<section id="objections" class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 05 — Objection Handling</div>
+    <h2 class="sec-title">What they'll push back with. <em>And what you say next.</em></h2>
+    <p class="sec-lede">
+      Customers entrenched with Microsoft, Zoom, or Genesys will raise legitimate counter-arguments — sunk cost, "good enough" monitoring, separate observability tools. Here's how to respond without over-promising and without retreating.
+    </p>
+  </div>
+
+  <div class="sim-frame reveal">
+    <div class="sim-intro">Tap a scenario. The prospect's actual likely objection on the left, and the response you should <em>actually</em> give on the right.</div>
+
+    <div class="sim-tabs" id="simTabs">
+      <button class="sim-tab active" data-sim="0">"Teams is free with M365"</button>
+      <button class="sim-tab" data-sim="1">"We have CQD"</button>
+      <button class="sim-tab" data-sim="2">"Zoom is good enough"</button>
+      <button class="sim-tab" data-sim="3">"We use Nectar / IR"</button>
+      <button class="sim-tab" data-sim="4">"Genesys is the CX leader"</button>
+      <button class="sim-tab" data-sim="5">"Sounds like lock-in"</button>
+    </div>
+
+    <div class="sim-panel active" data-panel="0">
+      <div class="sim-q">
+        <div class="role">Prospect · IT Director</div>
+        <div class="msg">"We already pay for M365. Teams comes free. Why would I pay extra for Webex when the meeting app does the same thing?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Reframe from "meeting app" to "meeting platform."</strong> Teams costs nothing — until your CFO's investor call drops, and you can't prove whether it was your network, your ISP, or Microsoft's cloud. Then you're buying IR or Nectar to find out, on top of M365. Webex with ThousandEyes ships that capability natively. <strong>The honest comparison is M365 + Teams + Nectar versus Webex + ThousandEyes</strong> — and the math changes fast.
+          <div class="punch">"Free at the app layer means expensive at the observability layer."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="1">
+      <div class="sim-q">
+        <div class="role">Prospect · Network Architect</div>
+        <div class="msg">"We use Microsoft's Call Quality Dashboard. It tells us when calls are bad. What more do we need?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Acknowledge CQD's strengths, then surface the question it can't answer.</strong> CQD is genuinely useful — for telling you a call was bad. It cannot tell you <em>why</em>, beyond what the Teams client itself observed. When the next finger-pointing call happens with your ISP or with Microsoft, you have client telemetry; ThousandEyes gives you path-level evidence. <strong>One tells you the symptom. The other tells you the cause.</strong>
+          <div class="punch">"CQD says the call was bad. ThousandEyes says exactly which hop made it bad."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="2">
+      <div class="sim-q">
+        <div class="role">Prospect · CIO</div>
+        <div class="msg">"Zoom works. Our users like it. Why would we go through a migration to Webex?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Don't argue with what works. Reframe what's at stake.</strong> Zoom-the-meeting-app is fine. Zoom-the-platform leaves you blind every time the network underneath misbehaves. Most enterprises don't notice until something visible breaks — a board meeting, an analyst call, a contact center day. By that point, you're chasing root cause with tools you don't own. <strong>Webex isn't trying to be a better Zoom; it's trying to be a more accountable platform.</strong> If your stakes are growing, that distinction matters.
+          <div class="punch">"You don't migrate for the meeting. You migrate for the day the meeting breaks."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="3">
+      <div class="sim-q">
+        <div class="role">Prospect · Ops Lead</div>
+        <div class="msg">"We already use Nectar (or IR, or VOSS) for unified communications observability. Why is Cisco's better?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Respect the tool — they exist for good reason — and then surface what's missing.</strong> Those vendors are excellent. They sell observability into the gap that Microsoft, Zoom, and Genesys leave open. With Webex, that gap doesn't exist — the observability is built in. So you have a choice: keep paying for the workaround your current vendor's gap creates, or buy a platform where the workaround isn't necessary. <strong>One of those scales better as your environment grows.</strong>
+          <div class="punch">"Those tools are great. They also exist because your current vendor needs them."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="4">
+      <div class="sim-q">
+        <div class="role">Prospect · CX Leader</div>
+        <div class="msg">"Genesys is the contact center leader. Why would I pick Webex CC over them?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Don't fight on the CX feature war — fight on what protects the brand.</strong> Genesys has a great platform. Their AI is competitive. Their omnichannel is mature. Where they lose is the moment voice quality degrades on a customer call, because their answer is "buy Operata or Nectar to find out why." Cisco's answer is "Control Hub already shows you why." For a CX leader, <strong>the brand-defending capability is in the network, not just the app</strong>. Webex CC with ThousandEyes is the only platform where you can prove "it's not us" before the customer hangs up.
+          <div class="punch">"Genesys protects your contact center. Webex protects your brand."</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sim-panel" data-panel="5">
+      <div class="sim-q">
+        <div class="role">Prospect · Procurement</div>
+        <div class="msg">"Tying Webex to ThousandEyes sounds like Cisco creating lock-in. Can I use ThousandEyes without Webex, or vice versa?"</div>
+      </div>
+      <div class="sim-a">
+        <div class="role">Your Response</div>
+        <div class="msg">
+          <strong>Answer truthfully — this is a strength, not a weakness.</strong> Yes, both products run standalone. ThousandEyes monitors Microsoft Teams, Zoom, AWS, Salesforce — anyone's stack. Webex runs on any network. The integration is a <strong>deployment advantage, not a coupling mechanism</strong>. Compare to Microsoft, where the observability story requires you to commit to M365 entirely; or Genesys, where you must adopt their partner ecosystem. Cisco's stack is composable — but if you choose to compose Cisco-on-Cisco, the integration depth is the reward.
+          <div class="punch">"You can buy Webex alone. You can buy ThousandEyes alone. Bought together, they multiply."</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 7: SCENARIO MATRIX ============ -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 06 — Six Customer Scenarios</div>
+    <h2 class="sec-title">When the customer asks "what would this actually <em>do</em> for us?"</h2>
+    <p class="sec-lede">
+      Match the prospect's pain to one of these. Each scenario is a real customer conversation pattern. Each one has a clean outcome story — and most of them are scenarios competitors literally cannot answer without buying additional tools.
+    </p>
+  </div>
+
+  <div class="scen-matrix reveal">
+    <div class="scen-card">
+      <div class="ico">i</div>
+      <h4>"The CEO's town hall keeps stuttering."</h4>
+      <p class="situation">Quarterly all-hands. Thousands of employees on Webex. The CEO's video freezes for some users in some regions. The exec team is furious. IT has 15 minutes to find the cause.</p>
+      <div class="outcome"><strong>Outcome:</strong> ThousandEyes Endpoint Agent + Cloud Agent correlation isolates the issue to a specific ISP's transit route. Evidence to escalate within the hour.</div>
+      <div class="teaser">// Use with: enterprise leadership accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">ii</div>
+      <h4>"Webex Calling sounds bad, but only for some."</h4>
+      <p class="situation">Voice calls on Webex Calling are crackly for users in two branch offices. Other branches are fine. The vendor's status page is green. The branch IT lead is convinced it's a Webex problem.</p>
+      <div class="outcome"><strong>Outcome:</strong> Cloud Agents at Webex Calling DCs prove the service is healthy. Path viz from branch users isolates the issue to a peering point on the local carrier.</div>
+      <div class="teaser">// Use with: multi-site Webex Calling accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">iii</div>
+      <h4>"Conference rooms keep dropping mid-meeting."</h4>
+      <p class="situation">Several Cisco Room kits across the corporate HQ disconnect from meetings unpredictably. The room hardware is fine. The local network looks healthy. Pattern unclear.</p>
+      <div class="outcome"><strong>Outcome:</strong> ThousandEyes agent on RoomOS reveals correlated MTU mismatches on a recently changed firewall rule. Fixed in one config push.</div>
+      <div class="teaser">// Use with: device-heavy Webex Rooms accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">iv</div>
+      <h4>"Our Contact Center agents keep losing customers."</h4>
+      <p class="situation">Webex CC agents report dropped calls and bad audio. Customers churn after a single bad interaction. Genesys-style "quality reporting" tells supervisors what but not why.</p>
+      <div class="outcome"><strong>Outcome:</strong> Endpoint Agent on agent laptops correlates dropped calls to specific home ISPs and Wi-Fi conditions. Targeted fix: ISP-class home upgrade for chronic-issue agents.</div>
+      <div class="teaser">// Use with: WFH-heavy contact centers</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">v</div>
+      <h4>"We're being told we're moving to Teams."</h4>
+      <p class="situation">A senior exec just got a Microsoft sales pitch and is questioning the Webex investment. IT needs to defend the platform without sounding defensive.</p>
+      <div class="outcome"><strong>Outcome:</strong> Show the exec a single Webex Control Hub view that correlates a user's bad meeting to their ISP. Demo Teams CQD's equivalent capability — there isn't one. The exec reframes the discussion.</div>
+      <div class="teaser">// Use with: defending incumbency in Cisco accounts</div>
+    </div>
+
+    <div class="scen-card">
+      <div class="ico">vi</div>
+      <h4>"We want one vendor for CX, UC, AND network observability."</h4>
+      <p class="situation">A consolidation-minded customer is tired of vendor sprawl. They have Genesys + Zoom + IR + a network team using SolarWinds. Procurement wants fewer contracts.</p>
+      <div class="outcome"><strong>Outcome:</strong> Webex CC + Webex Suite + ThousandEyes is one company, one Control Hub, one buying motion. The consolidation story is the deal.</div>
+      <div class="teaser">// Use with: cost-conscious consolidators</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 8: FAQ ACCORDION ============ -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 07 — Rapid-Fire FAQ</div>
+    <h2 class="sec-title">The quick ones. <em>Click to reveal.</em></h2>
+    <p class="sec-lede">
+      Answers to questions that come up in the last five minutes of a call, when the customer is deciding whether to schedule a second meeting.
+    </p>
+  </div>
+
+  <div class="obj-list reveal" id="objList">
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Which Cisco devices support the embedded ThousandEyes agent?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Cisco Board, Desk, and Room Series collaboration devices — running RoomOS — have the ThousandEyes Agent built into the firmware. Activation is via Control Hub, requires an Endpoint Agent license per device, and does not work in IPv6-only environments or with FIPS Mode enabled.</p>
+        <div class="evidence"><strong>Source</strong>help.webex.com — ThousandEyes Agent integration for Board, Desk, and Room Series devices</div>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"What's required to see Network Path data inside Webex Control Hub?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Three things: <strong>(1)</strong> a ThousandEyes Endpoint Agent installed on the user's machine (version 1.120.0 or higher), <strong>(2)</strong> Webex Desktop App locally signed in, and <strong>(3)</strong> the Control Hub integration activated. Once configured, a Network Path line appears under Audio Quality in the participant details page for any meeting that user joins.</p>
+        <div class="evidence"><strong>Source</strong>help.webex.com — Integrate ThousandEyes with Troubleshooting in Control Hub</div>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Can ThousandEyes monitor Webex Contact Center agent calls specifically?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Yes. ThousandEyes Cloud Agents are deployed at Webex Calling data centers and capture RTP traffic bidirectionally, so the path between agent and Webex Calling DC is observable. For WFH agents, the Endpoint Agent on the agent's laptop closes the loop on home Wi-Fi, ISP, and last-mile conditions.</p>
+        <div class="evidence"><strong>Source</strong>thousandeyes.com — Webex Monitoring solution page</div>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Does Endpoint Agent monitor non-Cisco meetings (Teams, Zoom)?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Yes — the agent itself is platform-agnostic and can monitor Teams and Zoom traffic. <strong>The key differentiator is integration:</strong> for Webex, the data appears natively inside Webex Control Hub. For Teams and Zoom, the data appears only in the ThousandEyes app — there's no native surfacing inside the Microsoft Teams Admin Center or Zoom Dashboard, because those vendors don't support it.</p>
+        <div class="evidence"><strong>Source</strong>WWT analysis — ThousandEyes integration with Webex Suite and Contact Centers</div>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"What licensing is required for the Webex side?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>The ThousandEyes integration is available across Webex licensing tiers but the Endpoint Agent licenses (Essential or Advantage, one per device) are purchased separately. For Contact Center customers, Cisco AI Assistant for Webex Contact Center is a paid add-on that pairs naturally with the ThousandEyes story for full agent + supervisor + network visibility.</p>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"How is this different from buying Webex and ThousandEyes separately?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>The products are licensed separately, but the integration is unique to Cisco-owned products. <strong>You cannot replicate this experience by buying a competitor's UCaaS plus ThousandEyes.</strong> ThousandEyes data won't surface inside Microsoft Teams Admin Center, Zoom Dashboard, or Genesys Cloud. The native cross-launch, the embedded RoomOS agent, and the Webex DC Cloud Agents are exclusively Cisco-on-Cisco capabilities.</p>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Can MSPs and partners deploy this for customers?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Yes. Partners managing customer Control Hub organizations can mass-activate Endpoint Agents on RoomOS devices and link account groups across customer tenants. This is a strong MSP enablement story — particularly for partners selling managed Webex services who want differentiated value beyond just provisioning.</p>
+      </div>
+    </div>
+
+    <div class="obj-item">
+      <div class="obj-q">
+        <div class="q-text">"Is there a way to demo this in a customer call?"</div>
+        <div class="q-toggle">+</div>
+      </div>
+      <div class="obj-a">
+        <div class="label">The answer</div>
+        <p>Yes — and you should. A live demo of Webex Control Hub Troubleshooting with the Network Path data visible, then a one-click cross-launch into ThousandEyes path visualization, is the most persuasive moment in this entire sales motion. <strong>It's the part competitors literally cannot show.</strong> Get familiar with this demo flow before customer-facing calls.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 9: SELLER WORKFLOW ============ -->
+<section class="wrap">
+  <div class="sec-head reveal">
+    <div class="sec-kicker">§ 08 — How To Run The Play</div>
+    <h2 class="sec-title">Four moves. <em>In this order.</em></h2>
+    <p class="sec-lede">
+      A concrete seller motion. This flow has been observed to convert competitive Webex deals — particularly in accounts where Microsoft or Zoom have strong incumbency — by shifting the comparison axis to network observability.
+    </p>
+  </div>
+
+  <div class="flow-grid reveal">
+    <div class="flow-step">
+      <div class="step-num">Move 01 · Discover</div>
+      <div class="step-title">Find the last bad meeting that mattered.</div>
+      <div class="step-desc">Don't pitch ThousandEyes. Ask about their last brand-impacting communication failure. A board meeting that glitched. A contact center afternoon when calls dropped. How did they figure out what went wrong?</div>
+      <div class="step-prompt">"Tell me about the last time a Webex / Teams / Zoom meeting failed at a moment that really mattered — and how you figured out why."</div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">Move 02 · Diagnose</div>
+      <div class="step-title">Surface the observability gap.</div>
+      <div class="step-desc">Without naming products, show the customer that their current toolchain answers "was it bad?" but not "why was it bad and is it our fault?" Establish that this gap is a structural feature of their current vendor's architecture.</div>
+      <div class="step-prompt">"Your current platform tells you the call was bad. What tells you whether the cause was your network, your ISP, or the vendor's cloud?"</div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">Move 03 · Demonstrate</div>
+      <div class="step-title">Show the cross-launch in Control Hub.</div>
+      <div class="step-desc">Open Webex Control Hub Troubleshooting. Show a meeting with Network Path data. Click into ThousandEyes for the hop-by-hop view. Then ask the customer where, in their current platform, they'd see this. They can't.</div>
+      <div class="step-prompt">"Watch this. From the meeting, into the network, in two clicks. Let me know when you've seen the equivalent elsewhere."</div>
+    </div>
+
+    <div class="flow-step">
+      <div class="step-num">Move 04 · Deploy POV</div>
+      <div class="step-title">Activate on a pilot.</div>
+      <div class="step-desc">Offer a 30-day Webex pilot with ThousandEyes Endpoint Agents on a subset of users (10–50). Run a board call or town hall during the pilot. The data from that real moment closes the deal — every time.</div>
+      <div class="step-prompt">"Give me 30 days and 25 users. Run your next exec event on the pilot. We'll review the network data together."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECTION 10: CLOSING BRIEF ============ -->
+<section id="brief" class="wrap">
+  <div class="brief reveal">
+    <div class="brief-label">§ Closing Brief · What To Remember</div>
+    <h2>
+      Microsoft and Zoom <em>sell software</em>.<br/>
+      Genesys and NICE <em>sell software</em>.<br/>
+      <span class="hl">Cisco sells the platform plus</span><br/>
+      <span class="hl">the network it runs on.</span>
+    </h2>
+
+    <div class="brief-bottom">
+      <div class="brief-msg">
+        <h4>If the customer remembers one sentence</h4>
+        <p>"Every collab and CX vendor needs network observability. Only Cisco owns it. That's not a feature — it's a structural advantage that compounds across every Webex meeting, every Webex Call, and every Webex Contact Center interaction."</p>
+      </div>
+      <div class="brief-meta">
+        <strong>Target customer:</strong><br/>
+        Hybrid + multi-site.<br/>
+        SaaS-heavy.<br/>
+        Brand-sensitive.<br/>
+        Already a Cisco network customer.<br/><br/>
+        <strong>Avg. deal motion:</strong><br/>
+        2 meetings to POV.<br/>
+        30 days of pilot data.<br/>
+        The Control Hub demo closes.<br/><br/>
+        <strong>Hero proof points:</strong><br/>
+        RoomOS-native · Control Hub native<br/>
+        Webex DC instrumented · CX brand-grade
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap foot-inner">
+    <div class="left">
+      Seller enablement material. Internal Cisco use. Capability claims sourced from Webex documentation (help.webex.com, docs.thousandeyes.com), Cisco Newsroom announcements (Sept 2025, Cisco Live EMEA 2026), competitive analyses (WWT, Gartner Peer Insights, G2), and competitor product documentation (Microsoft Learn, Zoom support, Genesys Resource Center, NICE CXone documentation, Five9 documentation, IR.com, Nectarcorp.com, Operata.com, VOSS-solutions.com) current to Q2 2026. Present competitor strengths accurately; the wedge is in the network-observability layer. Every claim is verifiable in the cited vendor's public product documentation.
+    </div>
+    <div style="text-align:right; min-width:220px">
+      Battle Card · Rev 1.0<br/>
+      Webex × ThousandEyes<br/>
+      Confidential · Cisco Internal
+    </div>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveals
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('in');
+    });
+  }, {threshold: 0.12});
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // Simulator tabs
+  const simTabs = document.querySelectorAll('.sim-tab');
+  const simPanels = document.querySelectorAll('.sim-panel');
+  simTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const i = tab.dataset.sim;
+      simTabs.forEach(t => t.classList.remove('active'));
+      simPanels.forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.querySelector(`.sim-panel[data-panel="${i}"]`).classList.add('active');
+    });
+  });
+
+  // Objection accordion
+  document.querySelectorAll('.obj-q').forEach(q => {
+    q.addEventListener('click', () => {
+      const item = q.closest('.obj-item');
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.obj-item').forEach(i => i.classList.remove('open'));
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+</script>
+
+</body>
+</html>
